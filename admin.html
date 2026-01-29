@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin | SchoolBank</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏦%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">🏦</span>
+        <span class="sidebar-brand">SchoolBank</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Panoramica</div>
+          <button class="nav-item active" data-nav="dashboard" onclick="showSection('dashboard')">
+            <span class="nav-item-icon">🏠</span> Dashboard
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Gestione</div>
+          <button class="nav-item" data-nav="students" onclick="showSection('students')">
+            <span class="nav-item-icon">👥</span> Studenti
+          </button>
+          <button class="nav-item" data-nav="classes" onclick="showSection('classes')">
+            <span class="nav-item-icon">🏫</span> Classi
+          </button>
+          <button class="nav-item" data-nav="teachers" onclick="showSection('teachers')">
+            <span class="nav-item-icon">👨‍🏫</span> Docenti
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Ricompense</div>
+          <button class="nav-item" data-nav="rewards" onclick="showSection('rewards')">
+            <span class="nav-item-icon">🎁</span> Catalogo Ricompense
+          </button>
+          <button class="nav-item" data-nav="quickrewards" onclick="showSection('quickrewards')">
+            <span class="nav-item-icon">⚡</span> Ricompense Rapide
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Sistema</div>
+          <button class="nav-item" data-nav="settings" onclick="showSection('settings')">
+            <span class="nav-item-icon">⚙️</span> Impostazioni
+          </button>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-menu" onclick="LoginPage.handleLogout()">
+          <div id="userAvatar" class="avatar">AD</div>
+          <div class="user-info">
+            <div id="userName" class="user-name">Admin</div>
+            <div id="userRole" class="user-role">Amministratore</div>
+          </div>
+          <span>🚪</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <div>
+          <h1 id="pageTitle" class="page-title">Dashboard</h1>
+          <p id="schoolName" class="text-muted" style="font-size:var(--text-sm);">SchoolBank</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="exportStudents()">📥 Esporta</button>
+        </div>
+      </header>
+
+      <div class="main-body">
+        <!-- Dashboard -->
+        <section id="dashboardSection" class="page-section">
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon primary">👥</div><div class="stat-content"><div id="statStudents" class="stat-value">0</div><div class="stat-label">Studenti</div></div></div>
+            <div class="stat-card"><div class="stat-icon info">👨‍🏫</div><div class="stat-content"><div id="statTeachers" class="stat-value">0</div><div class="stat-label">Docenti</div></div></div>
+            <div class="stat-card"><div class="stat-icon warning">🏫</div><div class="stat-content"><div id="statClasses" class="stat-value">0</div><div class="stat-label">Classi</div></div></div>
+            <div class="stat-card"><div class="stat-icon success">💰</div><div class="stat-content"><div id="statBalance" class="stat-value">$0</div><div class="stat-label">Saldo Totale</div></div></div>
+          </div>
+          <div class="card mt-6"><div class="card-header"><h3 class="card-title">🏆 Top Studenti</h3></div><div class="card-body" id="topStudentsContainer"></div></div>
+        </section>
+
+        <!-- Students -->
+        <section id="studentsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">👥 Studenti</h3>
+              <div style="display:flex;gap:var(--space-3);">
+                <select id="classFilter" class="input" style="width:150px;" onchange="renderStudents()"><option value="">Tutte</option></select>
+                <button class="btn btn-primary" onclick="openStudentModal()">+ Aggiungi</button>
+                <button class="btn btn-secondary" onclick="openBulkImportStudentModal()">📥 Importa in Blocco</button>
+              </div>
+            </div>
+            <div class="card-body" id="studentsContainer"></div>
+          </div>
+        </section>
+
+        <!-- Classes -->
+        <section id="classesSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">🏫 Classi</h3><div style="display:flex;gap:var(--space-3);"><button class="btn btn-primary" onclick="openClassModal()">+ Aggiungi</button><button class="btn btn-secondary" onclick="openBulkImportClassModal()">📥 Importa in Blocco</button></div></div>
+            <div class="card-body" id="classesContainer"></div>
+          </div>
+        </section>
+
+        <!-- Teachers -->
+        <section id="teachersSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">👨‍🏫 Docenti</h3><button class="btn btn-primary" onclick="openTeacherModal()">+ Aggiungi Docente</button></div>
+            <div class="card-body" id="teachersContainer"></div>
+          </div>
+        </section>
+
+        <!-- Rewards -->
+        <section id="rewardsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🎁 Ricompense Riscattabili</h3>
+              <div style="display: flex; gap: var(--space-2);">
+                <button class="btn btn-secondary" onclick="createDefaultRewards()">📋 Carica Predefinite</button>
+                <button class="btn btn-primary" onclick="openRewardModal()">+ Aggiungi</button>
+              </div>
+            </div>
+            <div class="card-body" id="rewardsContainer"></div>
+          </div>
+        </section>
+
+        <!-- Quick Rewards -->
+        <section id="quickrewardsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">⚡ Ricompense Rapide</h3>
+              <div style="display: flex; gap: var(--space-2);">
+                <button class="btn btn-secondary" onclick="createDefaultQuickRewards()">📋 Carica Predefiniti</button>
+                <button class="btn btn-primary" onclick="openQuickRewardModal()">+ Aggiungi</button>
+              </div>
+            </div>
+            <div class="card-body"><p class="text-muted mb-4">I docenti usano questi pulsanti per assegnare rapidamente punti.</p><div id="quickRewardsContainer" class="quick-rewards"></div></div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section id="settingsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">⚙️ Impostazioni</h3></div>
+            <div class="card-body">
+              <form id="settingsForm" onsubmit="saveSettings(event)">
+                <div class="input-group"><label class="input-label">Nome Scuola</label><input type="text" id="settingName" class="input"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+                  <div class="input-group"><label class="input-label">Simbolo Valuta</label><input type="text" id="settingSymbol" class="input" maxlength="3"></div>
+                  <div class="input-group"><label class="input-label">Nome Valuta</label><input type="text" id="settingCurrency" class="input"></div>
+                </div>
+                <div class="input-group"><label class="input-label"><input type="checkbox" id="settingLeaderboard"> Mostra Classifica</label></div>
+                <button type="submit" class="btn btn-primary">💾 Salva</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Student Modal -->
+  <div id="studentModalBackdrop" class="modal-backdrop"></div>
+  <div id="studentModal" class="modal">
+    <div class="modal-header"><h3 class="modal-title" id="studentModalTitle">Studente</h3><button class="modal-close" onclick="Modal.hide('studentModal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="studentId">
+      <div class="input-group"><label class="input-label">Nome *</label><input type="text" id="studentName" class="input" required></div>
+      <div class="input-group"><label class="input-label">Classe *</label><select id="studentClass" class="input" required></select></div>
+      <div class="input-group"><label class="input-label">Tag NFC</label><div style="display:flex;gap:var(--space-2);"><input type="text" id="studentNFC" class="input"><button type="button" class="btn btn-secondary" onclick="document.getElementById('studentNFC').value=NFC.generateTag()">🎲</button></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('studentModal')">Annulla</button><button class="btn btn-primary" onclick="saveStudent()">Salva</button></div>
+  </div>
+
+  <!-- Class Modal -->
+  <div id="classModalBackdrop" class="modal-backdrop"></div>
+  <div id="classModal" class="modal">
+    <div class="modal-header"><h3 class="modal-title">Classe</h3><button class="modal-close" onclick="Modal.hide('classModal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="classId">
+      <div class="input-group"><label class="input-label">Nome *</label><input type="text" id="className" class="input" placeholder="Es: 1A" required></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('classModal')">Annulla</button><button class="btn btn-primary" onclick="saveClass()">Salva</button></div>
+  </div>
+
+  <!-- Reward Modal -->
+  <div id="rewardModalBackdrop" class="modal-backdrop"></div>
+  <div id="rewardModal" class="modal">
+    <div class="modal-header"><h3 class="modal-title">Ricompensa</h3><button class="modal-close" onclick="Modal.hide('rewardModal')">×</button></div>
+    <div class="modal-body">
+      <div class="input-group"><label class="input-label">Nome *</label><input type="text" id="rewardName" class="input" required></div>
+      <div class="input-group"><label class="input-label">Descrizione</label><textarea id="rewardDesc" class="input"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+        <div class="input-group"><label class="input-label">Icona</label><input type="text" id="rewardIcon" class="input" value="🎁" maxlength="2"></div>
+        <div class="input-group"><label class="input-label">Costo *</label><input type="number" id="rewardCost" class="input" min="1" required></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('rewardModal')">Annulla</button><button class="btn btn-primary" onclick="saveReward()">Salva</button></div>
+  </div>
+
+  <!-- Quick Reward Modal -->
+  <div id="quickRewardModalBackdrop" class="modal-backdrop"></div>
+  <div id="quickRewardModal" class="modal">
+    <div class="modal-header"><h3 class="modal-title">Ricompensa Rapida</h3><button class="modal-close" onclick="Modal.hide('quickRewardModal')">×</button></div>
+    <div class="modal-body">
+      <div class="input-group"><label class="input-label">Nome *</label><input type="text" id="qrName" class="input" required></div>
+      <div class="input-group"><label class="input-label">Descrizione</label><textarea id="qrDesc" class="input"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+        <div class="input-group"><label class="input-label">Icona</label><input type="text" id="qrIcon" class="input" value="⭐" maxlength="2"></div>
+        <div class="input-group"><label class="input-label">Importo *</label><input type="number" id="qrAmount" class="input" required><p class="input-hint">Negativo per penalità</p></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('quickRewardModal')">Annulla</button><button class="btn btn-primary" onclick="saveQuickReward()">Salva</button></div>
+  </div>
+
+  <!-- Teacher Modal -->
+  <div id="teacherModalBackdrop" class="modal-backdrop"></div>
+  <div id="teacherModal" class="modal">
+    <div class="modal-header"><h3 class="modal-title">👨‍🏫 Nuovo Docente</h3><button class="modal-close" onclick="Modal.hide('teacherModal')">×</button></div>
+    <div class="modal-body">
+      <div class="input-group"><label class="input-label">Nome Completo *</label><input type="text" id="teacherName" class="input" placeholder="Mario Rossi" required></div>
+      <div class="input-group"><label class="input-label">Email *</label><input type="email" id="teacherEmail" class="input" placeholder="mario.rossi@scuola.it" required></div>
+      <div class="input-group"><label class="input-label">Password *</label><input type="password" id="teacherPassword" class="input" placeholder="Min 6 caratteri" required><p class="input-hint">Il docente potrà cambiarla al primo accesso</p></div>
+      <div class="input-group">
+        <label class="input-label">Classi Assegnate</label>
+        <div id="teacherClassesContainer" style="display:flex;flex-wrap:wrap;gap:var(--space-2);"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('teacherModal')">Annulla</button><button class="btn btn-primary" id="saveTeacherBtn" onclick="saveTeacher()">Crea Docente</button></div>
+  </div>
+
+  <!-- Bulk Import Classes Modal -->
+  <div id="bulkImportClassModalBackdrop" class="modal-backdrop"></div>
+  <div id="bulkImportClassModal" class="modal" style="max-width:600px;">
+    <div class="modal-header"><h3 class="modal-title">📥 Importa Classi in Blocco</h3><button class="modal-close" onclick="Modal.hide('bulkImportClassModal')">×</button></div>
+    <div class="modal-body">
+      <form id="bulkClassImportForm">
+        <div class="input-group">
+          <label class="input-label">Elenco Classi</label>
+          <textarea id="bulkClassList" class="input" rows="12" placeholder="Inserisci i nomi delle classi, uno per riga oppure separati da virgola, punto e virgola, o tab.
+
+Esempi accettati:
+1A
+1B
+2A
+2B
+
+oppure:
+1A, 1B, 2A, 2B
+
+oppure:
+1A; 1B; 2A; 2B"></textarea>
+          <p class="input-hint">💡 I nomi delle classi verranno automaticamente convertiti in maiuscolo.</p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Anno Scolastico</label>
+          <input type="text" id="bulkClassYear" class="input" style="max-width:200px;">
+        </div>
+
+        <div id="bulkClassPreview" class="bulk-preview" style="display:none;margin-top:var(--space-4);padding:var(--space-3);background:var(--background-alt);border-radius:var(--radius-md);">
+          <h4 style="margin-bottom:var(--space-3);">📝 Anteprima (<span id="bulkClassPreviewCount">0</span> classi rilevate)</h4>
+          <div id="bulkClassPreviewList" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('bulkImportClassModal')">Annulla</button><button class="btn btn-ghost" onclick="previewBulkClassImport()">👁️ Anteprima</button><button class="btn btn-primary" id="bulkClassImportBtn" onclick="executeBulkClassImport()">📥 Importa Tutte</button></div>
+  </div>
+
+  <!-- Bulk Import Students Modal -->
+  <div id="bulkImportStudentModalBackdrop" class="modal-backdrop"></div>
+  <div id="bulkImportStudentModal" class="modal" style="max-width:600px;">
+    <div class="modal-header"><h3 class="modal-title">📥 Importa Studenti in Blocco</h3><button class="modal-close" onclick="Modal.hide('bulkImportStudentModal')">×</button></div>
+    <div class="modal-body">
+      <form id="bulkStudentImportForm">
+        <div class="input-group">
+          <label class="input-label">Classe di Destinazione *</label>
+          <select id="bulkImportStudentClass" class="input" required></select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Elenco Studenti</label>
+          <textarea id="bulkStudentList" class="input" rows="12" placeholder="Inserisci i nomi degli studenti, uno per riga oppure separati da virgola, punto e virgola, o tab.
+
+Esempi accettati:
+Mario Rossi
+Luigi Verdi
+Anna Bianchi
+
+oppure:
+Mario Rossi, Luigi Verdi, Anna Bianchi
+
+oppure:
+Mario Rossi; Luigi Verdi; Anna Bianchi
+
+oppure copia/incolla da Excel!"></textarea>
+          <p class="input-hint">💡 Puoi copiare direttamente da Excel, Word, o qualsiasi elenco. Il sistema riconosce automaticamente il separatore.</p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Saldo Iniziale per Tutti</label>
+          <input type="number" id="bulkStudentInitialBalance" class="input" value="0" style="max-width:150px;">
+        </div>
+
+        <div id="bulkStudentPreview" class="bulk-preview" style="display:none;margin-top:var(--space-4);padding:var(--space-3);background:var(--background-alt);border-radius:var(--radius-md);">
+          <h4 style="margin-bottom:var(--space-3);">📝 Anteprima (<span id="bulkStudentPreviewCount">0</span> studenti rilevati)</h4>
+          <div id="bulkStudentPreviewList" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('bulkImportStudentModal')">Annulla</button><button class="btn btn-ghost" onclick="previewBulkStudentImport()">👁️ Anteprima</button><button class="btn btn-primary" id="bulkStudentImportBtn" onclick="executeBulkStudentImport()">📥 Importa Tutti</button></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/universaladmin.js"></script>
+
+  <script>
+    let students=[], classes=[], rewards=[], quickRewards=[], teachers=[], config={}, sym='$';
+
+    async function init() {
+      await Dashboard.init();
+      if (!Auth.requireAuth(['admin'])) return;
+      UserManager.init();
+      await loadData();
+    }
+
+    async function loadData() {
+      const school = await DB.getSchoolData();
+      config = school?.config || {};
+      sym = config.currencySymbol || '$';
+      
+      [students, classes, rewards, quickRewards] = await Promise.all([
+        DB.getStudents(), DB.getClasses(), DB.getRewards(), DB.getQuickRewards()
+      ]);
+      
+      // Load teachers
+      teachers = await UserManager.getSchoolUsers(Auth.getEffectiveSchoolId(), 'teacher');
+      
+      loadSettings();
+      updateStats();
+      populateSelectors();
+      renderStudents();
+      renderClasses();
+      renderTeachers();
+      renderRewards();
+      renderQuickRewards();
+      renderTopStudents();
+    }
+
+    function updateStats() {
+      const total = students.reduce((s,x)=>s+(x.balance||0),0);
+      document.getElementById('statStudents').textContent = students.length;
+      document.getElementById('statTeachers').textContent = teachers.length;
+      document.getElementById('statClasses').textContent = classes.length;
+      document.getElementById('statBalance').textContent = `${sym}${total}`;
+    }
+
+    function populateSelectors() {
+      ['classFilter','studentClass'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = id==='classFilter' ? '<option value="">Tutte</option>' : '<option value="">Seleziona</option>';
+        classes.forEach(c => el.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+      });
+    }
+
+    function renderStudents() {
+      const filter = document.getElementById('classFilter').value;
+      const list = filter ? students.filter(s=>s.classId===filter) : students;
+      const container = document.getElementById('studentsContainer');
+      
+      if (!list.length) { container.innerHTML = '<p class="text-muted">Nessuno studente</p>'; return; }
+      
+      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Nome</th><th>Classe</th><th>Saldo</th><th>NFC</th><th>Azioni</th></tr></thead><tbody>
+        ${list.map(s => {
+          const cls = classes.find(c=>c.id===s.classId);
+          return `<tr>
+            <td><div style="display:flex;align-items:center;gap:var(--space-2);"><div class="avatar avatar-sm">${UI.getInitials(s.name)}</div>${s.name}</div></td>
+            <td><span class="badge badge-primary">${cls?.name||'-'}</span></td>
+            <td class="${s.balance<0?'text-danger':'text-success'}" style="font-weight:bold;">${sym}${s.balance||0}</td>
+            <td><code style="font-size:var(--text-xs);">${s.nfcTag||'-'}</code></td>
+            <td><div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="editStudent('${s.id}')">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="window.open('student.html?id=${s.id}')">👁️</button>
+              <button class="btn btn-ghost btn-sm text-danger" onclick="deleteStudent('${s.id}')">🗑️</button>
+            </div></td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+    }
+
+    function renderClasses() {
+      const container = document.getElementById('classesContainer');
+      if (!classes.length) { container.innerHTML = '<p class="text-muted">Nessuna classe</p>'; return; }
+      
+      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Nome</th><th>Studenti</th><th>Azioni</th></tr></thead><tbody>
+        ${classes.map(c => {
+          const count = students.filter(s=>s.classId===c.id).length;
+          return `<tr><td><strong>${c.name}</strong></td><td>${count}</td><td>
+            <button class="btn btn-ghost btn-sm" onclick="editClass('${c.id}')">✏️</button>
+            <button class="btn btn-ghost btn-sm text-danger" onclick="deleteClass('${c.id}')">🗑️</button>
+          </td></tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+    }
+
+    function renderRewards() {
+      const container = document.getElementById('rewardsContainer');
+      if (!rewards.length) { container.innerHTML = '<p class="text-muted">Nessuna ricompensa</p>'; return; }
+      
+      container.innerHTML = rewards.map(r => `
+        <div class="reward-item" style="margin-bottom:var(--space-3);">
+          <div class="reward-icon">${r.icon||'🎁'}</div>
+          <div class="reward-info"><div class="reward-name">${r.name}</div><div class="reward-description">${r.description||''}</div></div>
+          <div class="reward-cost">${sym}${r.cost}</div>
+          <button class="btn btn-ghost btn-sm text-danger" onclick="deleteReward('${r.id}')">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function renderQuickRewards() {
+      const container = document.getElementById('quickRewardsContainer');
+      if (!quickRewards.length) { container.innerHTML = '<p class="text-muted">Nessuna ricompensa rapida</p>'; return; }
+      
+      container.innerHTML = quickRewards.map(r => `
+        <div class="quick-reward-btn ${r.amount<0?'negative':''}" style="position:relative;cursor:default;">
+          <button class="btn btn-ghost btn-sm" style="position:absolute;top:2px;right:2px;" onclick="deleteQuickReward('${r.id}')">×</button>
+          <span class="quick-reward-icon">${r.icon||'⭐'}</span>
+          <span class="quick-reward-name">${r.name}</span>
+          <span class="quick-reward-amount">${r.amount>=0?'+':''}${sym}${Math.abs(r.amount)}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderTopStudents() {
+      const container = document.getElementById('topStudentsContainer');
+      const sorted = [...students].sort((a,b)=>(b.balance||0)-(a.balance||0)).slice(0,10);
+      if (!sorted.length) { container.innerHTML = '<p class="text-muted">Nessuno studente</p>'; return; }
+      
+      container.innerHTML = sorted.map((s,i) => `
+        <div class="leaderboard-item">
+          <div class="leaderboard-rank" style="${i<3?'background:'+['gold','silver','#CD7F32'][i]:''}">${i+1}</div>
+          <div class="leaderboard-name">${s.name}</div>
+          <div class="leaderboard-balance">${sym}${s.balance||0}</div>
+        </div>
+      `).join('');
+    }
+
+    // CRUD Operations
+    function openStudentModal(s=null) {
+      document.getElementById('studentModalTitle').textContent = s ? 'Modifica Studente' : 'Nuovo Studente';
+      document.getElementById('studentId').value = s?.id || '';
+      document.getElementById('studentName').value = s?.name || '';
+      document.getElementById('studentClass').value = s?.classId || '';
+      document.getElementById('studentNFC').value = s?.nfcTag || '';
+      Modal.show('studentModal');
+    }
+
+    function editStudent(id) { openStudentModal(students.find(s=>s.id===id)); }
+
+    async function saveStudent() {
+      const id = document.getElementById('studentId').value;
+      const data = {
+        name: document.getElementById('studentName').value.trim(),
+        classId: document.getElementById('studentClass').value,
+        nfcTag: document.getElementById('studentNFC').value.trim().toUpperCase(),
+        className: classes.find(c=>c.id===document.getElementById('studentClass').value)?.name || ''
+      };
+      if (!data.name || !data.classId) { Toast.warning('Compila i campi obbligatori'); return; }
+      
+      try {
+        if (id) await DB.updateStudent(id, data);
+        else await DB.createStudent(data);
+        Modal.hide('studentModal');
+        await loadData();
+        Toast.success('Salvato!');
+      } catch(e) { Toast.error('Errore'); }
+    }
+
+    async function deleteStudent(id) {
+      if (!await Modal.confirm('Eliminare questo studente?')) return;
+      await DB.deleteStudent(id);
+      await loadData();
+      Toast.success('Eliminato');
+    }
+
+    function openClassModal(c=null) {
+      document.getElementById('classId').value = c?.id || '';
+      document.getElementById('className').value = c?.name || '';
+      Modal.show('classModal');
+    }
+
+    function editClass(id) { openClassModal(classes.find(c=>c.id===id)); }
+
+    async function saveClass() {
+      const id = document.getElementById('classId').value;
+      const name = document.getElementById('className').value.trim();
+      if (!name) { Toast.warning('Inserisci il nome'); return; }
+      
+      if (id) await DB.updateClass(id, {name});
+      else await DB.createClass({name});
+      Modal.hide('classModal');
+      await loadData();
+      Toast.success('Salvato!');
+    }
+
+    async function deleteClass(id) {
+      if (students.some(s=>s.classId===id)) { Toast.warning('Classe non vuota'); return; }
+      if (!await Modal.confirm('Eliminare?')) return;
+      await DB.deleteClass(id);
+      await loadData();
+      Toast.success('Eliminato');
+    }
+
+    function openRewardModal() { Modal.show('rewardModal'); }
+
+    async function saveReward() {
+      const data = {
+        name: document.getElementById('rewardName').value.trim(),
+        description: document.getElementById('rewardDesc').value.trim(),
+        icon: document.getElementById('rewardIcon').value || '🎁',
+        cost: parseInt(document.getElementById('rewardCost').value) || 0
+      };
+      if (!data.name || data.cost < 1) { Toast.warning('Compila i campi'); return; }
+      
+      await DB.createReward(data);
+      Modal.hide('rewardModal');
+      await loadData();
+      Toast.success('Ricompensa aggiunta!');
+    }
+
+    async function deleteReward(id) {
+      await DB.school('rewards').doc(id).delete();
+      await loadData();
+      Toast.success('Eliminato');
+    }
+
+    function openQuickRewardModal() { Modal.show('quickRewardModal'); }
+
+    async function saveQuickReward() {
+      const data = {
+        name: document.getElementById('qrName').value.trim(),
+        description: document.getElementById('qrDesc').value.trim(),
+        icon: document.getElementById('qrIcon').value || '⭐',
+        amount: parseInt(document.getElementById('qrAmount').value) || 0
+      };
+      if (!data.name || data.amount === 0) { Toast.warning('Compila i campi'); return; }
+      
+      await DB.createQuickReward(data);
+      Modal.hide('quickRewardModal');
+      await loadData();
+      Toast.success('Aggiunto!');
+    }
+
+    async function deleteQuickReward(id) {
+      await DB.school('quickRewards').doc(id).delete();
+      await loadData();
+    }
+
+    // ========== DEFAULT QUICK REWARDS ==========
+    const DEFAULT_QUICK_REWARDS = [
+      { name: 'Compiti facoltativi', description: 'Completa i compiti facoltativi assegnati', icon: '📚', amount: 30 },
+      { name: 'Email settimanale', description: 'Invia la tua email settimanale al docente', icon: '📧', amount: 50 },
+      { name: 'Controllo quaderno', description: 'Presenta il quaderno per il controllo', icon: '📓', amount: 10 },
+      { name: 'Disegni, colore e scrittura', description: 'Lavoro creativo con disegni e colori', icon: '🎨', amount: 20 },
+      { name: 'Ben organizzato', description: 'Mantieni il materiale ben organizzato', icon: '✅', amount: 100 },
+      { name: 'Commento adesivo', description: 'Lascia un commento positivo con adesivo', icon: '💬', amount: 150 }
+    ];
+
+    async function createDefaultQuickRewards() {
+      try {
+        const existingQuickRewards = await DB.getQuickRewards();
+        if (existingQuickRewards.length > 0) {
+          const confirmed = await Modal.confirm(
+            'Ci sono già dei premi rapidi. Vuoi sostituirli con quelli predefiniti?',
+            'Premi rapidi esistenti'
+          );
+          if (!confirmed) return;
+          
+          // Delete existing quick rewards
+          for (const qr of existingQuickRewards) {
+            await DB.school('quickRewards').doc(qr.id).delete();
+          }
+        }
+
+        // Create default quick rewards
+        for (const qr of DEFAULT_QUICK_REWARDS) {
+          await DB.createQuickReward(qr);
+        }
+
+        await loadData();
+        Toast.success('Premi rapidi predefiniti creati!');
+      } catch (error) {
+        console.error('Error creating default quick rewards:', error);
+        Toast.error('Errore nella creazione dei premi rapidi');
+      }
+    }
+
+    // ========== DEFAULT REWARDS ==========
+    const DEFAULT_REWARDS = [
+      { name: '1 settimana senza compiti', description: 'Una settimana completa senza compiti', icon: '📅', cost: 100 },
+      { name: 'Scegli una canzone', description: 'Scegli la canzone da ascoltare in classe', icon: '🎵', cost: 80 },
+      { name: 'Lavoro di gruppo', description: 'Scegli il tuo gruppo per il prossimo lavoro', icon: '👥', cost: 200 },
+      { name: 'Messaggio pubblico', description: 'Fai un annuncio alla classe', icon: '📢', cost: 200 },
+      { name: 'Test o rimuovi compiti', description: 'Scegli tra fare un test o rimuovere i compiti', icon: '📝', cost: 400 },
+      { name: 'Niente compiti', description: 'Salta i compiti per oggi', icon: '🚫', cost: 50 },
+      { name: 'Niente compiti classe', description: 'Tutta la classe senza compiti', icon: '🎉', cost: 300 },
+      { name: 'Sposta il test', description: 'Posticipa il test di un giorno', icon: '📆', cost: 60 },
+      { name: '+1 al voto', description: 'Aumenta un voto di 1 punto', icon: '⭐', cost: 300 },
+      { name: 'Scegli un compito', description: 'Scegli quale compito fare', icon: '✏️', cost: 150 }
+    ];
+
+    async function createDefaultRewards() {
+      try {
+        const existingRewards = await DB.getRewards();
+        if (existingRewards.length > 0) {
+          const confirmed = await Modal.confirm(
+            'Ci sono già delle ricompense. Vuoi sostituirle con quelle predefinite?',
+            'Ricompense esistenti'
+          );
+          if (!confirmed) return;
+          
+          // Delete existing rewards
+          for (const reward of existingRewards) {
+            await DB.school('rewards').doc(reward.id).delete();
+          }
+        }
+
+        // Create default rewards
+        for (const reward of DEFAULT_REWARDS) {
+          await DB.createReward(reward);
+        }
+
+        await loadData();
+        Toast.success('Ricompense predefinite create!');
+      } catch (error) {
+        console.error('Error creating default rewards:', error);
+        Toast.error('Errore nella creazione delle ricompense');
+      }
+    }
+
+    // ========== TEACHERS ==========
+    function renderTeachers() {
+      const container = document.getElementById('teachersContainer');
+      
+      if (!teachers.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👨‍🏫</div><div class="empty-state-title">Nessun docente</div><p class="text-muted">Aggiungi il primo docente</p></div>';
+        return;
+      }
+      
+      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Docente</th><th>Email</th><th>Classi</th><th>Azioni</th></tr></thead><tbody>
+        ${teachers.map(t => {
+          const assignedClasses = (t.classes || []).map(cId => classes.find(c=>c.id===cId)?.name || cId).join(', ');
+          return `<tr>
+            <td><div style="display:flex;align-items:center;gap:var(--space-2);"><div class="avatar avatar-sm">${UI.getInitials(t.name)}</div>${t.name}</div></td>
+            <td>${t.email}</td>
+            <td>${assignedClasses || '<span class="text-muted">Nessuna</span>'}</td>
+            <td><div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="editTeacherClasses('${t.id}')">✏️</button>
+              <button class="btn btn-ghost btn-sm text-danger" onclick="deleteTeacher('${t.id}')">🗑️</button>
+            </div></td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+    }
+
+    function openTeacherModal() {
+      document.getElementById('teacherName').value = '';
+      document.getElementById('teacherEmail').value = '';
+      document.getElementById('teacherPassword').value = '';
+      
+      // Render class checkboxes
+      const container = document.getElementById('teacherClassesContainer');
+      container.innerHTML = classes.map(c => `
+        <label style="display:flex;align-items:center;gap:var(--space-1);padding:var(--space-2);background:var(--background-alt);border-radius:var(--radius-md);">
+          <input type="checkbox" value="${c.id}" class="teacher-class-checkbox"> ${c.name}
+        </label>
+      `).join('');
+      
+      Modal.show('teacherModal');
+    }
+
+    async function saveTeacher() {
+      const name = document.getElementById('teacherName').value.trim();
+      const email = document.getElementById('teacherEmail').value.trim();
+      const password = document.getElementById('teacherPassword').value;
+      
+      if (!name || !email || !password) {
+        Toast.warning('Compila tutti i campi obbligatori');
+        return;
+      }
+      
+      if (password.length < 6) {
+        Toast.warning('La password deve avere almeno 6 caratteri');
+        return;
+      }
+      
+      // Get selected classes
+      const selectedClasses = Array.from(document.querySelectorAll('.teacher-class-checkbox:checked'))
+        .map(cb => cb.value);
+      
+      const btn = document.getElementById('saveTeacherBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Creazione...';
+      
+      try {
+        await UserManager.createUser(
+          email,
+          password,
+          name,
+          'teacher',
+          Auth.getEffectiveSchoolId(),
+          selectedClasses
+        );
+        
+        // Show instructions
+        alert(`✅ Docente "${name}" creato!\n\n📧 Email: ${email}\n🔑 Password: ${password}\n\n✅ L'utente è ATTIVO e può accedere immediatamente.\n\nIl docente può ora fare login con le credenziali sopra.`);
+        
+        Modal.hide('teacherModal');
+        Toast.success(`Docente ${name} creato!`);
+        await loadData();
+        
+      } catch (error) {
+        console.error('Errore creazione docente:', error);
+        Toast.error(error.message || 'Errore nella creazione del docente');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crea Docente';
+      }
+    }
+
+    async function editTeacherClasses(teacherId) {
+      const teacher = teachers.find(t => t.id === teacherId);
+      if (!teacher) return;
+      
+      const currentClasses = teacher.classes || [];
+      
+      // Simple prompt-based editing (could be improved with a modal)
+      const classOptions = classes.map((c, i) => `${i+1}. ${c.name} ${currentClasses.includes(c.id) ? '✓' : ''}`).join('\n');
+      const input = prompt(`Classi per ${teacher.name}:\n${classOptions}\n\nInserisci i numeri delle classi separati da virgola (es: 1,3,5):`);
+      
+      if (input === null) return;
+      
+      const selectedIndexes = input.split(',').map(s => parseInt(s.trim()) - 1).filter(i => i >= 0 && i < classes.length);
+      const selectedClassIds = selectedIndexes.map(i => classes[i].id);
+      
+      try {
+        await UserManager.updateTeacherClasses(teacherId, selectedClassIds);
+        Toast.success('Classi aggiornate!');
+        await loadData();
+      } catch (error) {
+        Toast.error('Errore nell\'aggiornamento');
+      }
+    }
+
+    async function deleteTeacher(teacherId) {
+      const teacher = teachers.find(t => t.id === teacherId);
+      if (!await Modal.confirm(`Eliminare il docente ${teacher?.name}?`)) return;
+      
+      try {
+        await UserManager.deleteUser(teacherId);
+        Toast.success('Docente eliminato');
+        await loadData();
+      } catch (error) {
+        Toast.error(error.message || 'Errore nell\'eliminazione');
+      }
+    }
+
+    // Settings
+    function loadSettings() {
+      document.getElementById('settingName').value = config.name || '';
+      document.getElementById('settingSymbol').value = config.currencySymbol || '$';
+      document.getElementById('settingCurrency').value = config.currencyName || 'Dollari';
+      document.getElementById('settingLeaderboard').checked = config.showLeaderboard !== false;
+    }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      const newConfig = {
+        name: document.getElementById('settingName').value.trim(),
+        currencySymbol: document.getElementById('settingSymbol').value.trim() || '$',
+        currencyName: document.getElementById('settingCurrency').value.trim() || 'Dollari',
+        showLeaderboard: document.getElementById('settingLeaderboard').checked
+      };
+      
+      await DB.schoolDoc().update({ config: newConfig });
+      config = newConfig;
+      sym = newConfig.currencySymbol;
+      document.getElementById('schoolName').textContent = newConfig.name;
+      Toast.success('Impostazioni salvate!');
+      await loadData();
+    }
+
+    function exportStudents() {
+      Export.download(students, [
+        {key:'name',label:'Nome'},
+        {key:'className',label:'Classe'},
+        {key:'balance',label:'Saldo'},
+        {key:'nfcTag',label:'NFC'}
+      ], 'studenti');
+    }
+
+    // === BULK CLASS IMPORT FUNCTIONS ===
+    function openBulkImportClassModal() {
+      document.getElementById('bulkClassList').value = '';
+      const currentYear = new Date().getFullYear();
+      document.getElementById('bulkClassYear').value = currentYear + '-' + (currentYear + 1);
+      document.getElementById('bulkClassPreview').style.display = 'none';
+      Modal.show('bulkImportClassModal');
+    }
+
+    function parseClassList(text) {
+      if (!text || !text.trim()) return { unique: [], duplicates: [], total: 0 };
+      
+      let normalized = text
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\t/g, '\n')
+        .replace(/;/g, '\n')
+        .replace(/,(?!\s*\d)/g, '\n');
+      
+      let classNames = normalized
+        .split('\n')
+        .map(cls => cls.trim())
+        .filter(cls => cls.length > 0)
+        .map(cls => cls.replace(/^\d+[\.\)\-\s]+/, '').trim())
+        .map(cls => cls.replace(/^[\-\*\•\>\s]+/, '').trim())
+        .filter(cls => cls.length >= 1)
+        .map(cls => cls.toUpperCase());
+      
+      const seen = new Set();
+      const unique = [];
+      const duplicates = [];
+      
+      classNames.forEach(cls => {
+        const normalized = cls.toLowerCase();
+        if (seen.has(normalized)) {
+          duplicates.push(cls);
+        } else {
+          seen.add(normalized);
+          unique.push(cls);
+        }
+      });
+      
+      return { unique, duplicates, total: classNames.length };
+    }
+
+    function previewBulkClassImport() {
+      const text = document.getElementById('bulkClassList').value;
+      const result = parseClassList(text);
+      
+      if (result.unique.length === 0) {
+        Toast.warning('Nessun nome di classe valido trovato');
+        return;
+      }
+      
+      const previewDiv = document.getElementById('bulkClassPreview');
+      const previewList = document.getElementById('bulkClassPreviewList');
+      const previewCount = document.getElementById('bulkClassPreviewCount');
+      
+      previewCount.textContent = result.unique.length;
+      
+      let html = result.unique.map((cls, i) => `
+        <div style="padding:var(--space-2);background:white;margin-bottom:var(--space-1);border-radius:var(--radius-sm);display:flex;align-items:center;gap:var(--space-2);">
+          <span style="font-weight:bold;color:var(--text-muted);">${i + 1}.</span>
+          <span>🏫 ${cls}</span>
+        </div>
+      `).join('');
+      
+      if (result.duplicates.length > 0) {
+        html += result.duplicates.map(cls => `
+          <div style="padding:var(--space-2);background:#fff3cd;margin-bottom:var(--space-1);border-radius:var(--radius-sm);display:flex;align-items:center;gap:var(--space-2);" title="Duplicato - verrà ignorato">
+            <span>⚠️</span>
+            <span style="text-decoration:line-through;">${cls}</span>
+          </div>
+        `).join('');
+      }
+      
+      let statsHtml = `<div style="margin-top:var(--space-3);padding:var(--space-3);background:var(--success);color:white;border-radius:var(--radius-sm);">
+        <strong>✅ Validi:</strong> ${result.unique.length}`;
+      
+      if (result.duplicates.length > 0) {
+        statsHtml += ` | <strong>⚠️ Duplicati ignorati:</strong> ${result.duplicates.length}`;
+      }
+      
+      statsHtml += '</div>';
+      previewList.innerHTML = html + statsHtml;
+      
+      previewDiv.style.display = 'block';
+    }
+
+    async function executeBulkClassImport() {
+      const text = document.getElementById('bulkClassList').value;
+      const classYear = document.getElementById('bulkClassYear').value.trim();
+      
+      const result = parseClassList(text);
+      
+      if (result.unique.length === 0) {
+        Toast.error('Nessun nome di classe valido da importare');
+        return;
+      }
+      
+      if (!confirm(`Stai per importare ${result.unique.length} classi. Continuare?`)) {
+        return;
+      }
+      
+      const btn = document.getElementById('bulkClassImportBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Importazione...';
+      btn.disabled = true;
+      
+      try {
+        let importedCount = 0;
+        
+        for (const className of result.unique) {
+          try {
+            // Same pattern as saveClass() - uses Auth.getEffectiveSchoolId() internally
+            await DB.createClass({
+              name: className,
+              year: classYear
+            });
+            importedCount++;
+          } catch (error) {
+            console.warn(`Errore importazione classe ${className}:`, error);
+            // Continue with next class
+          }
+        }
+        
+        Toast.success(`✅ Importate ${importedCount} classi!`);
+        Modal.hide('bulkImportClassModal');
+        
+        await loadData();
+        
+      } catch (error) {
+        console.error('Errore import classi:', error);
+        Toast.error('Errore durante l\'importazione');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id+'Section')?.classList.remove('hidden');
+      UI.setActiveNav(id);
+      const titles = {dashboard:'Dashboard',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
+      document.getElementById('pageTitle').textContent = titles[id] || 'Dashboard';
+    }
+
+    // === BULK STUDENT IMPORT FUNCTIONS ===
+    function openBulkImportStudentModal() {
+      document.getElementById('bulkStudentList').value = '';
+      document.getElementById('bulkStudentInitialBalance').value = '0';
+      document.getElementById('bulkStudentPreview').style.display = 'none';
+      
+      // Populate class selector
+      const classSelect = document.getElementById('bulkImportStudentClass');
+      classSelect.innerHTML = '<option value="">Seleziona classe</option>' + 
+        classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+      Modal.show('bulkImportStudentModal');
+    }
+
+    function parseStudentList(text) {
+      if (!text || !text.trim()) return { unique: [], duplicates: [], total: 0 };
+      
+      let normalized = text
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\t/g, '\n')
+        .replace(/;/g, '\n')
+        .replace(/,(?!\s*\d)/g, '\n');
+      
+      let names = normalized
+        .split('\n')
+        .map(name => name.trim())
+        .filter(name => name.length > 0)
+        .map(name => name.replace(/^\d+[\.\)\-\s]+/, '').trim())
+        .map(name => name.replace(/^[\-\*\•\>\s]+/, '').trim())
+        .filter(name => name.length >= 2);
+      
+      const seen = new Set();
+      const unique = [];
+      const duplicates = [];
+      
+      names.forEach(name => {
+        const normalized = name.toLowerCase();
+        if (seen.has(normalized)) {
+          duplicates.push(name);
+        } else {
+          seen.add(normalized);
+          unique.push(name);
+        }
+      });
+      
+      return { unique, duplicates, total: names.length };
+    }
+
+    function previewBulkStudentImport() {
+      const text = document.getElementById('bulkStudentList').value;
+      const result = parseStudentList(text);
+      
+      if (result.unique.length === 0) {
+        Toast.warning('Nessun nome valido trovato');
+        return;
+      }
+      
+      const previewDiv = document.getElementById('bulkStudentPreview');
+      const previewList = document.getElementById('bulkStudentPreviewList');
+      const previewCount = document.getElementById('bulkStudentPreviewCount');
+      
+      previewCount.textContent = result.unique.length;
+      
+      let html = result.unique.map((name, i) => `
+        <div style="padding:var(--space-2);background:white;margin-bottom:var(--space-1);border-radius:var(--radius-sm);display:flex;align-items:center;gap:var(--space-2);">
+          <span style="font-weight:bold;color:var(--text-muted);">${i + 1}.</span>
+          <span>👤 ${name}</span>
+        </div>
+      `).join('');
+      
+      if (result.duplicates.length > 0) {
+        html += result.duplicates.map(name => `
+          <div style="padding:var(--space-2);background:#fff3cd;margin-bottom:var(--space-1);border-radius:var(--radius-sm);display:flex;align-items:center;gap:var(--space-2);" title="Duplicato - verrà ignorato">
+            <span>⚠️</span>
+            <span style="text-decoration:line-through;">${name}</span>
+          </div>
+        `).join('');
+      }
+      
+      let statsHtml = `<div style="margin-top:var(--space-3);padding:var(--space-3);background:var(--success);color:white;border-radius:var(--radius-sm);">
+        <strong>✅ Validi:</strong> ${result.unique.length}`;
+      
+      if (result.duplicates.length > 0) {
+        statsHtml += ` | <strong>⚠️ Duplicati ignorati:</strong> ${result.duplicates.length}`;
+      }
+      
+      statsHtml += '</div>';
+      previewList.innerHTML = html + statsHtml;
+      
+      previewDiv.style.display = 'block';
+    }
+
+    async function executeBulkStudentImport() {
+      const classId = document.getElementById('bulkImportStudentClass').value;
+      const text = document.getElementById('bulkStudentList').value;
+      const initialBalance = parseFloat(document.getElementById('bulkStudentInitialBalance').value) || 0;
+      
+      if (!classId) {
+        Toast.error('Seleziona una classe');
+        return;
+      }
+      
+      const result = parseStudentList(text);
+      
+      if (result.unique.length === 0) {
+        Toast.error('Nessun nome valido da importare');
+        return;
+      }
+      
+      const selectedClass = classes.find(c => c.id === classId);
+      if (!confirm(`Stai per importare ${result.unique.length} studenti nella classe ${selectedClass?.name}. Continuare?`)) {
+        return;
+      }
+      
+      const btn = document.getElementById('bulkStudentImportBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Importazione...';
+      btn.disabled = true;
+      
+      try {
+        let importedCount = 0;
+        
+        for (const name of result.unique) {
+          try {
+            await DB.createStudent({
+              name: name,
+              classId: classId,
+              className: selectedClass?.name || '',
+              balance: initialBalance,
+              nfcTag: null
+            });
+            importedCount++;
+          } catch (error) {
+            console.warn(`Errore importazione studente ${name}:`, error);
+            // Continue with next student
+          }
+        }
+        
+        Toast.success(`✅ Importati ${importedCount} studenti!`);
+        Modal.hide('bulkImportStudentModal');
+        
+        await loadData();
+        
+      } catch (error) {
+        console.error('Errore import studenti:', error);
+        Toast.error('Errore durante l\'importazione');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id+'Section')?.classList.remove('hidden');
+      UI.setActiveNav(id);
+      const titles = {dashboard:'Dashboard',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
+      document.getElementById('pageTitle').textContent = titles[id] || 'Dashboard';
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

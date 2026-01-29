@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il Mio Saldo | SchoolBank</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏦%3C/text%3E%3C/svg%3E">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    .student-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .student-header {
+      text-align: center;
+      color: white;
+      margin-bottom: var(--space-6);
+      animation: slideInDown 0.5s ease;
+    }
+
+    .student-header .logo { font-size: 3rem; margin-bottom: var(--space-2); }
+    .student-header h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--font-extrabold); text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .student-header .school-name { font-size: var(--text-sm); opacity: 0.9; margin-top: var(--space-1); }
+
+    .student-main-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      animation: slideInUp 0.6s ease;
+    }
+
+    .balance-section {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      padding: var(--space-8) var(--space-6);
+      text-align: center;
+      color: white;
+    }
+
+    .student-name { font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
+    .student-class { font-size: var(--text-sm); opacity: 0.8; margin-bottom: var(--space-4); }
+    .balance-label { font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: var(--space-2); }
+    .balance-amount { font-family: var(--font-display); font-size: 4rem; font-weight: var(--font-extrabold); line-height: 1; }
+    .balance-amount.negative { color: #FF6B6B; }
+
+    .subject-balances {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .subject-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      background: rgba(255,255,255,0.15);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+    }
+
+    .student-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .student-tab {
+      flex: 1;
+      padding: var(--space-4);
+      font-size: var(--text-sm);
+      font-weight: var(--font-semibold);
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+    .student-tab::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transition: transform var(--transition-fast);
+    }
+    .student-tab.active { color: var(--primary); }
+    .student-tab.active::after { transform: scaleX(1); }
+
+    .tab-content { display: none; padding: var(--space-4); max-height: 400px; overflow-y: auto; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+    .transaction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      border-radius: var(--radius-lg);
+      background: var(--background-alt);
+      margin-bottom: var(--space-2);
+    }
+    .transaction-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--surface); border-radius: var(--radius-md); flex-shrink: 0; }
+    .transaction-info { flex: 1; min-width: 0; }
+    .transaction-reason { font-weight: var(--font-medium); font-size: var(--text-sm); margin-bottom: 4px; }
+    .transaction-meta { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+    .transaction-amount { font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--success); }
+    .transaction-amount.negative { color: var(--danger); }
+
+    .reward-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--background-alt);
+      margin-bottom: var(--space-3);
+      border: 2px solid transparent;
+    }
+    .reward-item.affordable { border-color: var(--success-light); background: rgba(46, 204, 113, 0.05); }
+    .reward-icon { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; background: var(--surface); border-radius: var(--radius-lg); }
+    .reward-info { flex: 1; }
+    .reward-name { font-weight: var(--font-semibold); }
+    .reward-description { font-size: var(--text-sm); color: var(--text-muted); margin-top: 2px; }
+    .reward-cost { font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--accent); }
+    .reward-item.affordable .reward-cost { color: var(--success); }
+    .request-btn { margin-top: var(--space-2); padding: var(--space-2) var(--space-4); font-size: var(--text-sm); background: var(--primary); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; }
+    .request-btn:hover { background: var(--primary-dark); }
+
+    .leaderboard-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-lg); background: var(--background-alt); margin-bottom: var(--space-2); }
+    .leaderboard-item.current-user { background: rgba(var(--primary-rgb), 0.1); border: 2px solid var(--primary); }
+    .leaderboard-rank { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); background: var(--surface); border-radius: var(--radius-full); }
+    .leaderboard-item:nth-child(1) .leaderboard-rank { background: gold; }
+    .leaderboard-item:nth-child(2) .leaderboard-rank { background: silver; }
+    .leaderboard-item:nth-child(3) .leaderboard-rank { background: #CD7F32; color: white; }
+    .leaderboard-name { flex: 1; font-weight: var(--font-medium); }
+    .leaderboard-balance { font-weight: var(--font-bold); color: var(--primary); }
+
+    .motivation-quote {
+      margin-top: var(--space-6);
+      padding: var(--space-4);
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      color: white;
+      font-style: italic;
+      backdrop-filter: blur(10px);
+      max-width: 420px;
+    }
+
+    .student-error, .student-loading { width: 100%; max-width: 420px; padding: var(--space-8); background: var(--surface); border-radius: var(--radius-2xl); text-align: center; box-shadow: var(--shadow-xl); }
+    .student-error-icon, .student-loading-icon { font-size: 4rem; margin-bottom: var(--space-4); }
+    .student-error h2 { color: var(--danger); margin-bottom: var(--space-2); }
+
+    @media (max-width: 480px) {
+      .student-page { padding: var(--space-3); }
+      .balance-amount { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-page">
+    <header class="student-header">
+      <div class="logo">🏦</div>
+      <h1>SchoolBank</h1>
+      <p id="schoolNameHeader" class="school-name">Caricamento...</p>
+    </header>
+
+    <div id="loadingState" class="student-loading">
+      <div class="student-loading-icon"><div class="spinner spinner-lg"></div></div>
+      <p>Caricamento dati studente...</p>
+    </div>
+
+    <div id="errorState" class="student-error hidden">
+      <div class="student-error-icon">😕</div>
+      <h2>Studente non trovato</h2>
+      <p id="errorMessage" class="text-muted">Verifica il link o contatta il tuo professore.</p>
+    </div>
+
+    <main id="mainContent" class="student-main-card hidden">
+      <div class="balance-section">
+        <h2 id="studentName" class="student-name">Nome Studente</h2>
+        <p id="studentClass" class="student-class">Classe 1A</p>
+        <p class="balance-label">Il tuo saldo</p>
+        <div id="studentBalance" class="balance-amount">$0</div>
+        <div id="subjectBalances" class="subject-balances hidden"></div>
+      </div>
+
+      <div class="student-tabs">
+        <button class="student-tab active" data-tab="transactions" onclick="switchTab('transactions')">📜 Transazioni</button>
+        <button class="student-tab" data-tab="rewards" onclick="switchTab('rewards')">🎁 Ricompense</button>
+        <button id="leaderboardTabBtn" class="student-tab hidden" data-tab="leaderboard" onclick="switchTab('leaderboard')">🏆 Classifica</button>
+      </div>
+
+      <div id="transactionsTab" class="tab-content active">
+        <div id="transactionsList"></div>
+        <div id="noTransactions" class="empty-state hidden">
+          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-title">Nessuna transazione</div>
+        </div>
+      </div>
+
+      <div id="rewardsTab" class="tab-content">
+        <div id="rewardsList"></div>
+        <div id="noRewards" class="empty-state hidden">
+          <div class="empty-state-icon">🎁</div>
+          <div class="empty-state-title">Nessuna ricompensa disponibile</div>
+        </div>
+      </div>
+
+      <div id="leaderboardTab" class="tab-content">
+        <div id="leaderboardList"></div>
+      </div>
+    </main>
+
+    <div id="motivationQuote" class="motivation-quote hidden"></div>
+  </div>
+
+  <!-- Teacher Selection Modal -->
+  <div id="teacherModal" class="teacher-selection-modal" style="display: none;" onclick="closeTeacherModal()">
+    <div class="card" style="max-width: 400px; margin: auto; margin-top: 100px;" onclick="event.stopPropagation()">
+      <div class="card-header">
+        <h3 style="margin: 0;">👨‍🏫 Scegli il Professore</h3>
+      </div>
+      <div class="card-body">
+        <p style="margin-bottom: var(--space-4); color: var(--text-muted);">A quale professore vuoi inviare la richiesta?</p>
+        <div id="teachersList" style="max-height: 300px; overflow-y: auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .teacher-selection-modal {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999 !important;
+      padding: 20px;
+    }
+    .teacher-selection-modal .card {
+      background: white;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      z-index: 10000;
+      position: relative;
+    }
+    .teacher-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .teacher-item:hover {
+      background: #5D3FD3;
+      color: white;
+      transform: translateX(5px);
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/script.js"></script>
+
+  <script>
+    const MOTIVATION_QUOTES = [
+      "💡 Spendi saggiamente!",
+      "✅ Le buone scelte ripagano sempre.",
+      "🌟 Il tempo speso imparando è sempre ben speso!",
+      "🚀 Ogni sforzo di oggi costruisce il tuo domani.",
+      "🎯 Obiettivi chiari portano a grandi risultati!",
+      "💪 La costanza batte il talento.",
+      "📚 La conoscenza è il vero tesoro."
+    ];
+
+    let currentStudent = null;
+    let schoolData = null;
+    let currentRewardRequest = null;
+    let teachers = [];
+
+    async function init() {
+      const params = new URLSearchParams(location.search);
+      const studentId = params.get('id');
+      const nfcTag = params.get('nfc');
+      
+      if (!studentId && !nfcTag) {
+        showError('Manca il parametro di identificazione');
+        return;
+      }
+
+      try {
+        if (nfcTag) {
+          await findStudentByNFC(nfcTag);
+        } else {
+          await loadStudentById(studentId);
+        }
+      } catch (error) {
+        console.error('Errore:', error);
+        showError(error.message || 'Errore nel caricamento');
+      }
+    }
+
+    async function findStudentByNFC(nfcTag) {
+      const normalizedTag = nfcTag.toUpperCase().trim();
+      const schoolsSnap = await db.collection('schools').get();
+      
+      for (const schoolDoc of schoolsSnap.docs) {
+        const studentsSnap = await db.collection('schools')
+          .doc(schoolDoc.id)
+          .collection('students')
+          .where('nfcTag', '==', normalizedTag)
+          .limit(1)
+          .get();
+        
+        if (!studentsSnap.empty) {
+          const studentDoc = studentsSnap.docs[0];
+          schoolData = { id: schoolDoc.id, ...schoolDoc.data() };
+          currentStudent = { id: studentDoc.id, schoolId: schoolDoc.id, ...studentDoc.data() };
+          await loadStudentData();
+          return;
+        }
+      }
+      
+      showError('Carta NFC non riconosciuta');
+    }
+
+    async function loadStudentById(studentId) {
+      const schoolsSnap = await db.collection('schools').get();
+      
+      for (const schoolDoc of schoolsSnap.docs) {
+        const studentDoc = await db.collection('schools')
+          .doc(schoolDoc.id)
+          .collection('students')
+          .doc(studentId)
+          .get();
+        
+        if (studentDoc.exists) {
+          schoolData = { id: schoolDoc.id, ...schoolDoc.data() };
+          currentStudent = { id: studentId, schoolId: schoolDoc.id, ...studentDoc.data() };
+          await loadStudentData();
+          return;
+        }
+      }
+      
+      showError('Studente non trovato');
+    }
+
+    async function loadStudentData() {
+      document.getElementById('schoolNameHeader').textContent = schoolData.config?.name || 'SchoolBank';
+      document.getElementById('studentName').textContent = currentStudent.name;
+      document.getElementById('studentClass').textContent = `Classe ${currentStudent.className || currentStudent.classId || ''}`;
+      
+      const balance = currentStudent.balance || 0;
+      const symbol = schoolData.config?.currencySymbol || '$';
+      const balanceEl = document.getElementById('studentBalance');
+      balanceEl.textContent = `${balance < 0 ? '-' : ''}${symbol}${Math.abs(balance)}`;
+      balanceEl.classList.toggle('negative', balance < 0);
+      
+      await loadTransactions();
+      await loadRewards();
+      await loadTeachers();
+      
+      if (schoolData.config?.showLeaderboard) {
+        document.getElementById('leaderboardTabBtn').classList.remove('hidden');
+        await loadLeaderboard();
+      }
+      
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+      showMotivation();
+      
+      // Real-time listener
+      db.collection('schools').doc(currentStudent.schoolId)
+        .collection('students').doc(currentStudent.id)
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            const bal = data.balance || 0;
+            balanceEl.textContent = `${bal < 0 ? '-' : ''}${symbol}${Math.abs(bal)}`;
+            balanceEl.classList.toggle('negative', bal < 0);
+          }
+        });
+    }
+
+    async function loadTransactions() {
+      const list = document.getElementById('transactionsList');
+      const empty = document.getElementById('noTransactions');
+      const symbol = schoolData.config?.currencySymbol || '$';
+      
+      try {
+        const snapshot = await db.collection('schools')
+          .doc(currentStudent.schoolId)
+          .collection('transactions')
+          .where('studentId', '==', currentStudent.id)
+          .get();
+        
+        let transactions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Sort by timestamp descending in JavaScript to avoid index requirement
+        transactions.sort((a, b) => {
+          const timeA = a.timestamp?.toMillis?.() || 0;
+          const timeB = b.timestamp?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+        
+        // Limit to 30 most recent
+        transactions = transactions.slice(0, 30);
+        
+        console.log('Transactions loaded:', transactions);
+        
+        if (transactions.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+        
+        empty.classList.add('hidden');
+        list.innerHTML = transactions.map(tx => {
+          console.log('Transaction:', tx);
+          return `
+          <div class="transaction-item">
+            <div class="transaction-icon">${tx.icon || '⭐'}</div>
+            <div class="transaction-info">
+              <div class="transaction-amount ${tx.amount < 0 ? 'negative' : ''}">${tx.amount >= 0 ? '+' : ''}${symbol}${Math.abs(tx.amount)}</div>
+              <div class="transaction-reason">${tx.reason || 'Nessuna motivazione'}</div>
+              <div class="transaction-meta">Da ${tx.teacherName || 'Prof'} • ${tx.timestamp ? formatTime(tx.timestamp) : ''}</div>
+            </div>
+          </div>
+        `;
+        }).join('');
+      } catch (error) {
+        console.error('Errore transazioni:', error);
+        list.innerHTML = '<p style="color: red; padding: 20px;">Errore: ' + error.message + '</p>';
+      }
+    }
+
+    async function loadRewards() {
+      const list = document.getElementById('rewardsList');
+      const empty = document.getElementById('noRewards');
+      const balance = currentStudent.balance || 0;
+      const symbol = schoolData.config?.currencySymbol || '$';
+      
+      try {
+        const snapshot = await db.collection('schools')
+          .doc(currentStudent.schoolId)
+          .collection('rewards')
+          .get();
+        
+        const allRewards = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(reward => reward.active !== false); // Mostra tutte tranne quelle esplicitamente disattivate
+        
+        // Filtra solo le ricompense che lo studente può permettersi
+        const rewards = allRewards.filter(reward => balance >= reward.cost);
+        
+        if (rewards.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+        
+        empty.classList.add('hidden');
+        list.innerHTML = rewards.map(reward => {
+          return `
+            <div class="reward-item affordable">
+              <div class="reward-icon">${reward.icon || '🎁'}</div>
+              <div class="reward-info">
+                <div class="reward-name">${reward.name}</div>
+                <div class="reward-description">${reward.description || ''}</div>
+                <button class="request-btn" data-reward-id="${reward.id}">Richiedi</button>
+              </div>
+              <div class="reward-cost">${symbol}${reward.cost}</div>
+            </div>
+          `;
+        }).join('');
+        
+        console.log('Rewards loaded, adding event listeners...');
+        // Aggiungi event listeners ai pulsanti
+        const buttons = document.querySelectorAll('.request-btn');
+        console.log('Found buttons:', buttons.length);
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            console.log('Button clicked, reward ID:', btn.dataset.rewardId);
+            requestReward(btn.dataset.rewardId);
+          });
+        });
+      } catch (error) {
+        console.error('Errore caricamento ricompense:', error);
+        empty.classList.remove('hidden');
+      }
+    }
+
+    async function loadTeachers() {
+      try {
+        const snapshot = await db.collection('users')
+          .where('schoolId', '==', currentStudent.schoolId)
+          .where('role', '==', 'teacher')
+          .get();
+        teachers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (error) {
+        console.error('Errore caricamento professori:', error);
+      }
+    }
+
+    async function requestReward(rewardId) {
+      console.log('requestReward called with ID:', rewardId);
+      console.log('Teachers:', teachers);
+      
+      if (teachers.length === 0) {
+        alert('❌ Nessun professore disponibile');
+        return;
+      }
+      
+      currentRewardRequest = rewardId;
+      console.log('Current reward request set to:', currentRewardRequest);
+      
+      // Mostra modale con lista professori
+      const modal = document.getElementById('teacherModal');
+      const list = document.getElementById('teachersList');
+      
+      console.log('Modal element:', modal);
+      
+      list.innerHTML = teachers.map(teacher => `
+        <div class="teacher-item" data-teacher-id="${teacher.id}" data-teacher-name="${teacher.name}">
+          <div style="width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+            ${teacher.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight: var(--font-semibold);">${teacher.name}</div>
+            <div style="font-size: var(--text-sm); color: var(--text-muted);">Professore</div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Aggiungi event listeners
+      document.querySelectorAll('.teacher-item').forEach(item => {
+        item.addEventListener('click', () => {
+          console.log('Teacher selected:', item.dataset.teacherName);
+          sendRewardRequest(item.dataset.teacherId, item.dataset.teacherName);
+        });
+      });
+      
+      console.log('Showing modal...');
+      modal.style.display = 'flex';
+      console.log('Modal display style:', modal.style.display);
+    }
+    
+    function closeTeacherModal() {
+      const modal = document.getElementById('teacherModal');
+      modal.style.display = 'none';
+      currentRewardRequest = null;
+    }
+    
+    async function sendRewardRequest(teacherId, teacherName) {
+      try {
+        await db.collection('schools')
+          .doc(currentStudent.schoolId)
+          .collection('rewardRequests')
+          .add({
+            studentId: currentStudent.id,
+            studentName: currentStudent.name,
+            rewardId: currentRewardRequest,
+            teacherId: teacherId,
+            teacherName: teacherName,
+            status: 'pending',
+            requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        closeTeacherModal();
+        alert('✅ Richiesta inviata a ' + teacherName + '!');
+      } catch (error) {
+        console.error('Errore:', error);
+        alert('❌ Errore nell\'invio');
+      }
+    }
+
+    async function loadLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      const symbol = schoolData.config?.currencySymbol || '$';
+      
+      try {
+        const snapshot = await db.collection('schools')
+          .doc(currentStudent.schoolId)
+          .collection('students')
+          .where('classId', '==', currentStudent.classId)
+          .orderBy('balance', 'desc')
+          .limit(20)
+          .get();
+        
+        const students = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        list.innerHTML = students.map((student, idx) => `
+          <div class="leaderboard-item ${student.id === currentStudent.id ? 'current-user' : ''}">
+            <div class="leaderboard-rank">${idx + 1}</div>
+            <div class="leaderboard-name">${student.id === currentStudent.id ? '⭐ ' : ''}${student.name}</div>
+            <div class="leaderboard-balance">${symbol}${student.balance || 0}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Errore classifica:', error);
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.student-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tabName}Tab`).classList.add('active');
+    }
+
+    function showError(message) {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('mainContent').classList.add('hidden');
+      document.getElementById('errorState').classList.remove('hidden');
+      document.getElementById('errorMessage').textContent = message;
+    }
+
+    function showMotivation() {
+      const quote = MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)];
+      const el = document.getElementById('motivationQuote');
+      el.textContent = quote;
+      el.classList.remove('hidden');
+    }
+
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+      const mins = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (mins < 1) return 'adesso';
+      if (mins < 60) return `${mins}m fa`;
+      if (hours < 24) return `${hours}h fa`;
+      if (days < 7) return `${days}g fa`;
+      return date.toLocaleDateString('it-IT');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Docente | SchoolBank</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏦%3C/text%3E%3C/svg%3E">
+  
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container" id="appContainer">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="mainSidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">🏦</span>
+        <span class="sidebar-brand">SchoolBank</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Menu</div>
+          <button class="nav-item active" data-nav="dashboard" onclick="showSection('dashboard')">
+            <span class="nav-item-icon">🏠</span>
+            Home
+          </button>
+          <button class="nav-item" data-nav="rewards" onclick="showSection('rewards')">
+            <span class="nav-item-icon">⭐</span>
+            Dai Premi
+          </button>
+          <button class="nav-item" data-nav="classes" onclick="showSection('classes')">
+            <span class="nav-item-icon">🏫</span>
+            Le Mie Classi
+          </button>
+          <button class="nav-item" data-nav="students" onclick="showSection('students')">
+            <span class="nav-item-icon">👥</span>
+            Studenti
+          </button>
+          <button class="nav-item" data-nav="history" onclick="showSection('history')">
+            <span class="nav-item-icon">📜</span>
+            Storico
+          </button>
+          <button class="nav-item" data-nav="requests" onclick="showSection('requests')">
+            <span class="nav-item-icon">🎁</span>
+            Richieste
+            <span id="requestsBadge" class="nav-item-badge hidden">0</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Altro</div>
+          <button class="nav-item" data-nav="all-classes" onclick="showSection('all-classes')">
+            <span class="nav-item-icon">📚</span>
+            Tutte le Classi
+          </button>
+          <button class="nav-item" data-nav="impostazioni" onclick="showSection('impostazioni')">
+            <span class="nav-item-icon">⚙️</span>
+            Impostazioni
+          </button>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-menu" onclick="LoginPage.handleLogout()">
+          <div id="userAvatar" class="avatar">TD</div>
+          <div class="user-info">
+            <div id="userName" class="user-name">Prof. Docente</div>
+            <div id="userRole" class="user-role">Docente</div>
+          </div>
+          <span>🚪</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+      <header class="main-header" id="mainHeader">
+        <div>
+          <h1 id="pageTitle" class="page-title">Dashboard</h1>
+          <p id="schoolName" class="text-muted" style="font-size: var(--text-sm);">SchoolBank</p>
+        </div>
+        <div class="header-actions">
+          <select id="classSelector" class="input" style="width: auto; min-width: 150px;" onchange="onClassChange()">
+            <option value="">Tutte le classi</option>
+          </select>
+        </div>
+      </header>
+
+      <div class="main-body">
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="page-section">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: var(--space-6);">
+            <div style="text-align: center; margin-bottom: var(--space-8);">
+              <div style="font-size: 4rem; margin-bottom: var(--space-4);">🏦</div>
+              <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: var(--space-2);">SchoolBank</h1>
+              <p id="dashboardUserName" style="font-size: var(--text-lg); color: var(--text-muted);">Prof. Docente</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); max-width: 800px; width: 100%;">
+              <button class="card" onclick="showSection('rewards')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">⭐</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Dai Premi</div>
+              </button>
+              
+              <button class="card" onclick="showSection('classes')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">🏫</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Le Mie Classi</div>
+              </button>
+              
+              <button class="card" onclick="showSection('students')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">👥</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Studenti</div>
+              </button>
+              
+              <button class="card" onclick="showSection('history')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">📜</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Storico</div>
+              </button>
+              
+              <button class="card" onclick="showSection('requests')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <span id="dashboardRequestsBadge" class="nav-item-badge hidden" style="position: absolute; top: var(--space-3); right: var(--space-3);">0</span>
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">🎁</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Richieste</div>
+              </button>
+              
+              <button class="card" onclick="showSection('all-classes')" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; padding: var(--space-6); text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                <div style="font-size: 3rem; margin-bottom: var(--space-3);">📚</div>
+                <div style="font-size: var(--text-lg); font-weight: 600;">Tutte le Classi</div>
+              </button>
+            </div>
+            
+            <button class="btn btn-ghost" onclick="LoginPage.handleLogout()" style="margin-top: var(--space-8);">
+              🚪 Esci
+            </button>
+          </div>
+        </section>
+
+        <!-- Rewards Section -->
+        <section id="rewardsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">⭐ Assegna Premio</h3>
+            </div>
+            <div class="card-body">
+              <div class="input-group">
+                <label class="input-label">Seleziona Premio Rapido</label>
+                <div id="rewardButtonsGrid" class="quick-rewards"></div>
+              </div>
+              
+              <div style="text-align: center; margin: var(--space-4) 0; color: var(--text-muted);">oppure</div>
+              
+              <div class="input-group">
+                <label class="input-label">Premio Personalizzato</label>
+                <div style="display: flex; gap: var(--space-3);">
+                  <input type="text" id="customEmoji" class="input" placeholder="Emoji" value="⭐" style="width: 70px; text-align: center; font-size: 1.5rem;" maxlength="2">
+                  <input type="number" id="customAmount" class="input" placeholder="Importo" style="width: 120px;">
+                  <input type="text" id="customReason" class="input" placeholder="Motivazione">
+                </div>
+              </div>
+              
+              <div class="input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                  <label class="input-label" style="margin-bottom: 0;">Seleziona Studenti</label>
+                  <button class="btn btn-ghost btn-sm" onclick="selectAllStudents()" style="padding: var(--space-1) var(--space-3);">
+                    ✅ Seleziona Tutti
+                  </button>
+                </div>
+                <div id="studentSelectGrid" class="student-select-grid"></div>
+              </div>
+              
+              <button id="giveRewardBtn" class="btn btn-primary btn-lg w-full mt-4" onclick="giveCustomReward()" disabled>
+                ⭐ Assegna Premio
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Classes Section -->
+        <section id="classesSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🏫 Le Mie Classi</h3>
+            </div>
+            <div class="card-body" id="classesContainer">
+              <div class="text-center"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Students Section -->
+        <section id="studentsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">👥 I Miei Studenti</h3>
+              <div class="search-bar">
+                <span class="search-bar-icon">🔍</span>
+                <input type="text" class="input" placeholder="Cerca studente..." oninput="filterStudents(this.value)">
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="studentsTableContainer"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📜 Storico Transazioni</h3>
+            </div>
+            <div class="card-body">
+              <div id="historyList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Requests Section -->
+        <section id="requestsSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🎁 Richieste Ricompensa</h3>
+            </div>
+            <div class="card-body">
+              <div id="requestsList"></div>
+              <div id="noRequests" class="empty-state hidden">
+                <div class="empty-state-icon">📭</div>
+                <div class="empty-state-title">Nessuna richiesta in attesa</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- All Classes Section -->
+        <section id="all-classesSection" class="page-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📚 Tutte le Classi della Scuola</h3>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-4">Visualizza tutte le classi della scuola. Utile per supplenze e premi occasionali.</p>
+              <div id="allClassesContainer"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="impostazioniSection" class="page-section hidden">
+          <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <div class="card-header">
+              <h3 class="card-title">⚙️ Impostazioni Account</h3>
+            </div>
+            <div class="card-body">
+              <!-- Change Name -->
+              <div class="input-group">
+                <label class="input-label">Cambia Nome</label>
+                <input type="text" id="newDisplayName" class="input" placeholder="Inserisci nuovo nome">
+                <button class="btn btn-primary w-full mt-2" onclick="changeDisplayName()">
+                  ✏️ Aggiorna Nome
+                </button>
+              </div>
+
+              <hr style="margin: var(--space-6) 0; border: none; border-top: 1px solid var(--color-border);">
+
+              <!-- Change Password -->
+              <div class="input-group">
+                <label class="input-label">Cambia Password</label>
+                <input type="password" id="currentPassword" class="input" placeholder="Password attuale" style="margin-bottom: var(--space-2);">
+                <input type="password" id="newPassword" class="input" placeholder="Nuova password" style="margin-bottom: var(--space-2);">
+                <input type="password" id="confirmPassword" class="input" placeholder="Conferma nuova password">
+                <button class="btn btn-primary w-full mt-2" onclick="changePassword()">
+                  🔒 Aggiorna Password
+                </button>
+              </div>
+
+              <div id="settingsMessage" class="mt-4" style="display: none; padding: var(--space-3); border-radius: var(--radius-md); text-align: center;"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Quick Reward Modal -->
+  <div id="quickRewardModalBackdrop" class="modal-backdrop"></div>
+  <div id="quickRewardModal" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">⭐ <span id="modalRewardName">Premio</span></h3>
+      <button class="modal-close" onclick="Modal.hide('quickRewardModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="mb-4">Seleziona gli studenti a cui assegnare il premio:</p>
+      <div id="modalStudentGrid" class="student-select-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.hide('quickRewardModal')">Annulla</button>
+      <button id="modalConfirmBtn" class="btn btn-primary" onclick="confirmQuickReward()">Assegna</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/universaladmin.js"></script>
+
+  <script>
+    let myClasses = [];
+    let allSchoolClasses = [];
+    let myStudents = [];
+    let quickRewards = [];
+    let selectedStudents = new Set();
+    let currentQuickReward = null;
+    let currencySymbol = '$';
+    let tempSelectedClasses = []; // For manage classes section
+
+    async function init() {
+      await Dashboard.init();
+      
+      // Allow teacher, admin, and superadmin
+      if (!Auth.requireAuth(['teacher'])) return;
+      
+      // For superadmin without impersonation, redirect to select school
+      const role = Auth.userProfile?.role;
+      if (role === 'superadmin' && !Auth.isImpersonating()) {
+        Toast.warning('Seleziona prima una scuola da gestire');
+        window.location.href = 'superadmin.html';
+        return;
+      }
+      
+      // Get teacher's assigned classes
+      const teacherClasses = Auth.userProfile.classes || [];
+      
+      // Load school data
+      const schoolData = await DB.getSchoolData();
+      currencySymbol = schoolData?.config?.currencySymbol || '$';
+      
+      // Load classes
+      allSchoolClasses = await DB.getClasses();
+      
+      // Filter to teacher's classes (or all if admin/superadmin)
+      if (Auth.canActAsAdmin()) {
+        myClasses = allSchoolClasses;
+      } else {
+        // Sort classes according to teacher's preference (order in the array)
+        if (teacherClasses.length > 0) {
+          myClasses = teacherClasses
+            .map(classId => allSchoolClasses.find(c => c.id === classId))
+            .filter(Boolean); // Remove nulls if class doesn't exist
+        } else {
+          myClasses = [];
+        }
+      }
+      
+      populateClassSelectors();
+      await loadMyStudents();
+      await loadQuickRewards();
+      await loadStats();
+      renderDashboardClasses();
+      await loadRecentTransactions();
+      await loadPendingRequests();
+    }
+
+    function populateClassSelectors() {
+      const selectors = ['classSelector'];
+      selectors.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Tutte le classi</option>';
+        myClasses.forEach(cls => {
+          select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`;
+        });
+      });
+    }
+
+    async function loadMyStudents(classId = null) {
+      const classIds = classId ? [classId] : myClasses.map(c => c.id);
+      
+      if (classIds.length === 0) {
+        myStudents = [];
+        renderStudentSelects();
+        renderStudentsTable();
+        return;
+      }
+      
+      // Get all students for teacher's classes
+      const allStudents = await DB.getStudents();
+      myStudents = allStudents.filter(s => classIds.includes(s.classId));
+      
+      renderStudentSelects();
+      renderStudentsTable();
+    }
+
+    function renderStudentSelects() {
+      const grids = ['studentSelectGrid', 'modalStudentGrid'];
+      
+      grids.forEach(gridId => {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        
+        if (myStudents.length === 0) {
+          grid.innerHTML = '<p class="text-muted text-center p-4">Nessuno studente trovato</p>';
+          return;
+        }
+        
+        grid.innerHTML = myStudents.map(student => `
+          <div class="student-select-card" data-student-id="${student.id}" onclick="toggleStudentSelection('${student.id}', '${gridId}')">
+            <div class="avatar">${UI.getInitials(student.name)}</div>
+            <div class="student-select-name">${student.name}</div>
+            <div class="student-select-balance">${currencySymbol}${student.balance || 0}</div>
+          </div>
+        `).join('');
+      });
+    }
+
+    function toggleStudentSelection(studentId, gridId) {
+      const card = document.querySelector(`#${gridId} [data-student-id="${studentId}"]`);
+      
+      if (selectedStudents.has(studentId)) {
+        selectedStudents.delete(studentId);
+        card?.classList.remove('selected');
+      } else {
+        selectedStudents.add(studentId);
+        card?.classList.add('selected');
+      }
+      
+      updateRewardButton();
+    }
+
+    function selectAllStudents() {
+      // Select all students
+      myStudents.forEach(student => {
+        selectedStudents.add(student.id);
+      });
+      
+      // Update UI for all grids
+      const grids = ['studentSelectGrid', 'modalStudentGrid'];
+      grids.forEach(gridId => {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        
+        grid.querySelectorAll('.student-select-card').forEach(card => {
+          card.classList.add('selected');
+        });
+      });
+      
+      updateRewardButton();
+    }
+
+    function updateRewardButton() {
+      const btn = document.getElementById('giveRewardBtn');
+      const count = selectedStudents.size;
+      
+      if (count > 0) {
+        btn.disabled = false;
+        btn.textContent = `⭐ Assegna Premio a ${count} student${count > 1 ? 'i' : 'e'}`;
+      } else {
+        btn.disabled = true;
+        btn.textContent = '⭐ Assegna Premio';
+      }
+    }
+
+    async function loadQuickRewards() {
+      quickRewards = await DB.getQuickRewards();
+      renderQuickRewards();
+    }
+
+    function renderQuickRewards() {
+      const containers = ['quickRewardsList', 'rewardButtonsGrid'];
+      
+      containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        if (quickRewards.length === 0) {
+          container.innerHTML = '<p class="text-muted text-center">Nessuna ricompensa rapida configurata</p>';
+          return;
+        }
+        
+        container.innerHTML = quickRewards.map(reward => `
+          <button class="quick-reward-btn ${reward.amount < 0 ? 'negative' : ''}" onclick="openQuickRewardModal('${reward.id}')">
+            <span class="quick-reward-icon">${reward.icon || '⭐'}</span>
+            <span class="quick-reward-name">${reward.name}</span>
+            <span class="quick-reward-amount">${reward.amount >= 0 ? '+' : ''}${currencySymbol}${Math.abs(reward.amount)}</span>
+          </button>
+        `).join('');
+      });
+    }
+
+    function openQuickRewardModal(rewardId) {
+      currentQuickReward = quickRewards.find(r => r.id === rewardId);
+      if (!currentQuickReward) return;
+      
+      // Switch to rewards section
+      showSection('rewards');
+      
+      // Fill custom reward fields with quick reward data
+      document.getElementById('customEmoji').value = currentQuickReward.icon || '⭐';
+      document.getElementById('customAmount').value = currentQuickReward.amount;
+      document.getElementById('customReason').value = currentQuickReward.name;
+      
+      // Clear selected students and re-render
+      selectedStudents.clear();
+      renderStudentSelects();
+      updateRewardButton();
+      
+      // Scroll to the custom reward section smoothly
+      setTimeout(() => {
+        const rewardSection = document.getElementById('rewardsSection');
+        if (rewardSection) {
+          rewardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+
+    async function confirmQuickReward() {
+      if (!currentQuickReward || selectedStudents.size === 0) return;
+      
+      const btn = document.getElementById('modalConfirmBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Assegnazione...';
+      
+      try {
+        for (const studentId of selectedStudents) {
+          await DB.giveReward(
+            studentId,
+            currentQuickReward.amount,
+            currentQuickReward.name,
+            currentQuickReward.icon
+          );
+        }
+        
+        Toast.success(`Premio assegnato a ${selectedStudents.size} studenti!`);
+        Modal.hide('quickRewardModal');
+        selectedStudents.clear();
+        
+        await loadMyStudents();
+        await loadStats();
+        await loadRecentTransactions();
+        
+      } catch (error) {
+        console.error('Errore:', error);
+        Toast.error('Errore nell\'assegnazione del premio');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Assegna';
+      }
+    }
+
+    async function giveCustomReward() {
+      const amount = parseInt(document.getElementById('customAmount').value);
+      const reason = document.getElementById('customReason').value.trim();
+      const emoji = document.getElementById('customEmoji').value.trim() || '⭐';
+      
+      if (!amount || !reason || selectedStudents.size === 0) {
+        Toast.warning('Compila tutti i campi e seleziona almeno uno studente');
+        return;
+      }
+      
+      const btn = document.getElementById('giveRewardBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner spinner-sm"></span> Assegnazione...';
+      
+      try {
+        for (const studentId of selectedStudents) {
+          await DB.giveReward(studentId, amount, reason, emoji);
+        }
+        
+        Toast.success(`Premio assegnato a ${selectedStudents.size} studenti!`);
+        
+        // Reset form
+        document.getElementById('customAmount').value = '';
+        document.getElementById('customReason').value = '';
+        document.getElementById('customEmoji').value = '⭐';
+        selectedStudents.clear();
+        renderStudentSelects();
+        
+        await loadMyStudents();
+        await loadStats();
+        await loadRecentTransactions();
+        
+      } catch (error) {
+        console.error('Errore:', error);
+        Toast.error('Errore nell\'assegnazione del premio');
+      } finally {
+        updateRewardButton();
+      }
+    }
+
+
+
+    async function loadStats() {
+      const stats = {
+        classes: myClasses.length,
+        students: myStudents.length,
+        totalBalance: myStudents.reduce((sum, s) => sum + (s.balance || 0), 0),
+        todayRewards: 0,
+        pendingRequests: 0
+      };
+      
+      // Count today's transactions
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      try {
+        const txSnapshot = await DB.school('transactions')
+          .where('teacherId', '==', Auth.currentUser.uid)
+          .where('timestamp', '>=', today)
+          .get();
+        stats.todayRewards = txSnapshot.size;
+      } catch (e) {
+        // Index might not exist yet
+      }
+      
+      // Count pending requests for this teacher
+      try {
+        const reqSnapshot = await DB.school('rewardRequests')
+          .where('teacherId', '==', Auth.currentUser.uid)
+          .where('status', '==', 'pending')
+          .get();
+        stats.pendingRequests = reqSnapshot.size;
+        
+        const badge = document.getElementById('requestsBadge');
+        const dashboardBadge = document.getElementById('dashboardRequestsBadge');
+        if (stats.pendingRequests > 0) {
+          badge.textContent = stats.pendingRequests;
+          badge.classList.remove('hidden');
+          if (dashboardBadge) {
+            dashboardBadge.textContent = stats.pendingRequests;
+            dashboardBadge.classList.remove('hidden');
+          }
+        } else {
+          badge.classList.add('hidden');
+          if (dashboardBadge) dashboardBadge.classList.add('hidden');
+        }
+      } catch (e) {}
+      
+      document.getElementById('statClasses').textContent = stats.classes;
+      document.getElementById('statStudents').textContent = stats.students;
+      document.getElementById('statTotalBalance').textContent = `${currencySymbol}${stats.totalBalance}`;
+      document.getElementById('statTodayRewards').textContent = stats.todayRewards;
+      document.getElementById('statPendingRequests').textContent = stats.pendingRequests;
+    }
+
+    async function loadRecentTransactions() {
+      const container = document.getElementById('recentTransactions');
+      
+      try {
+        const transactions = await DB.getTransactions({ teacherId: Auth.currentUser.uid }, 10);
+        console.log('Recent transactions loaded:', transactions);
+        
+        if (transactions.length === 0) {
+          container.innerHTML = '<p class="text-muted text-center">Nessuna transazione recente</p>';
+          return;
+        }
+        
+        container.innerHTML = transactions.map(tx => {
+          console.log('Recent transaction:', tx);
+          return `
+          <div class="transaction-item">
+            <div class="transaction-icon">${tx.icon || '⭐'}</div>
+            <div class="transaction-info">
+              <div class="transaction-reason"><strong>Studente:</strong> ${tx.studentName || 'Studente'}</div>
+              <div class="transaction-meta"><strong>Premio:</strong> ${tx.amount >= 0 ? '+' : ''}${currencySymbol}${Math.abs(tx.amount)}</div>
+              <div class="transaction-meta"><strong>Motivazione:</strong> ${tx.reason || 'Nessuna motivazione'}</div>
+              <div class="transaction-meta"><strong>Data:</strong> ${Format.relativeTime(tx.timestamp)}</div>
+            </div>
+          </div>
+        `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading recent transactions:', error);
+        container.innerHTML = '<p class="text-muted text-center">Errore nel caricamento: ' + error.message + '</p>';
+      }
+    }
+
+    async function loadPendingRequests() {
+      const container = document.getElementById('requestsList');
+      const empty = document.getElementById('noRequests');
+      
+      try {
+        // Carica solo le richieste indirizzate a questo professore
+        const snapshot = await DB.school('rewardRequests')
+          .where('teacherId', '==', Auth.currentUser.uid)
+          .where('status', '==', 'pending')
+          .get();
+        
+        let requests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Ordina per data in JavaScript
+        requests.sort((a, b) => {
+          const timeA = a.requestedAt?.toMillis?.() || 0;
+          const timeB = b.requestedAt?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+        
+        console.log('Loaded requests for teacher:', requests);
+        
+        // Get reward details
+        const rewards = await DB.getRewards();
+        const rewardMap = Object.fromEntries(rewards.map(r => [r.id, r]));
+        
+        if (requests.length === 0) {
+          container.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        
+        empty.classList.add('hidden');
+        container.innerHTML = requests.map(req => {
+          const reward = rewardMap[req.rewardId] || { name: 'Premio', cost: 0, icon: '🎁' };
+          return `
+            <div class="transaction-item" style="flex-wrap: wrap;">
+              <div class="transaction-icon">${reward.icon}</div>
+              <div class="transaction-info">
+                <div class="transaction-reason">${req.studentName}</div>
+                <div class="transaction-meta">${reward.name} • ${currencySymbol}${reward.cost}</div>
+              </div>
+              <div style="display: flex; gap: var(--space-2);">
+                <button class="btn btn-success btn-sm" onclick="approveRequest('${req.id}')">✅</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectRequest('${req.id}')">❌</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Errore caricamento richieste:', error);
+        container.innerHTML = '<p class="text-muted text-center">Errore nel caricamento</p>';
+      }
+    }
+
+    async function approveRequest(requestId) {
+      try {
+        await DB.approveRewardRequest(requestId);
+        Toast.success('Richiesta approvata!');
+        await loadPendingRequests();
+        await loadStats();
+        await loadMyStudents();
+      } catch (error) {
+        Toast.error('Errore nell\'approvazione');
+      }
+    }
+
+    async function rejectRequest(requestId) {
+      const confirmed = await Modal.confirm('Vuoi rifiutare questa richiesta?');
+      if (!confirmed) return;
+      
+      try {
+        await DB.rejectRewardRequest(requestId);
+        Toast.success('Richiesta rifiutata');
+        await loadPendingRequests();
+        await loadStats();
+      } catch (error) {
+        Toast.error('Errore nel rifiuto');
+      }
+    }
+
+    function renderStudentsTable() {
+      const container = document.getElementById('studentsTableContainer');
+      
+      if (myStudents.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">Nessuno studente trovato</p>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Studente</th>
+                <th>Classe</th>
+                <th>Saldo</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${myStudents.map(student => {
+                const cls = myClasses.find(c => c.id === student.classId);
+                return `
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: var(--space-3);">
+                        <div class="avatar avatar-sm">${UI.getInitials(student.name)}</div>
+                        ${student.name}
+                      </div>
+                    </td>
+                    <td>${cls?.name || student.classId}</td>
+                    <td>
+                      <span class="${student.balance < 0 ? 'text-danger' : 'text-success'}" style="font-weight: var(--font-bold);">
+                        ${currencySymbol}${student.balance || 0}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="quickGive('${student.id}', 1)">+1</button>
+                        <button class="btn btn-danger btn-sm" onclick="quickGive('${student.id}', -1)">-1</button>
+                        <button class="btn btn-ghost btn-sm" onclick="viewStudentPage('${student.id}')">👁️</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function quickGive(studentId, amount) {
+      try {
+        await DB.giveReward(studentId, amount, amount > 0 ? 'Premio rapido' : 'Penalità', amount > 0 ? '⭐' : '📉');
+        Toast.success(amount > 0 ? '+1 assegnato!' : '-1 assegnato!');
+        await loadMyStudents();
+        await loadStats();
+      } catch (error) {
+        Toast.error('Errore');
+      }
+    }
+
+    function viewStudentPage(studentId) {
+      window.open(`student.html?id=${studentId}`, '_blank');
+    }
+
+    function filterStudents(term) {
+      const filtered = Search.filter(myStudents, term, ['name']);
+      const container = document.getElementById('studentsTableContainer');
+      
+      // Re-render with filtered data
+      const originalStudents = myStudents;
+      myStudents = filtered;
+      renderStudentsTable();
+      myStudents = originalStudents;
+    }
+
+    async function onClassChange() {
+      const classId = document.getElementById('classSelector').value;
+      await loadMyStudents(classId || null);
+      await loadStats();
+      renderDashboardClasses();
+    }
+
+    function renderDashboardClasses() {
+      const container = document.getElementById('dashboardClassesContainer');
+      
+      if (myClasses.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🏫</div>
+            <div class="empty-state-title">Nessuna classe assegnata</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-3);">
+          ${myClasses.slice(0, 4).map(cls => {
+            const studentsInClass = myStudents.filter(s => s.classId === cls.id);
+            const totalBalance = studentsInClass.reduce((sum, s) => sum + (s.balance || 0), 0);
+            
+            return `
+              <div class="card" style="cursor: pointer; border: 1px solid var(--border-color);\" onclick="viewClassStudents('${cls.id}')">
+                <div class="card-body" style="padding: var(--space-4);">
+                  <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+                    <div style="font-size: 24px;">🏫</div>
+                    <h4 style="font-size: var(--text-lg); margin: 0;">${cls.name}</h4>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                    <span class="text-muted" style="font-size: var(--text-sm);">👥 Studenti:</span>
+                    <strong>${studentsInClass.length}</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span class="text-muted" style="font-size: var(--text-sm);">💰 Saldo:</span>
+                    <strong class="${totalBalance < 0 ? 'text-danger' : 'text-success'}">${currencySymbol}${totalBalance}</strong>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        ${myClasses.length > 4 ? `
+          <div class="text-center mt-4">
+            <button class="btn btn-ghost" onclick="showSection('classes')">Vedi tutte le ${myClasses.length} classi →</button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+      
+      // Show selected section
+      document.getElementById(`${sectionId}Section`)?.classList.remove('hidden');
+      
+      // Hide/show sidebar and header based on section
+      const sidebar = document.getElementById('mainSidebar');
+      const header = document.getElementById('mainHeader');
+      const mainContent = document.getElementById('mainContent');
+      
+      if (sectionId === 'dashboard') {
+        sidebar.style.display = 'none';
+        header.style.display = 'none';
+        mainContent.style.marginLeft = '0';
+      } else {
+        sidebar.style.display = 'flex';
+        header.style.display = 'flex';
+        mainContent.style.marginLeft = '';
+      }
+      
+      // Update nav
+      UI.setActiveNav(sectionId);
+      
+      // Update title
+      const titles = {
+        dashboard: 'Home',
+        rewards: 'Assegna Premi',
+        classes: 'Le Mie Classi',
+        students: 'I Miei Studenti',
+        history: 'Storico Transazioni',
+        requests: 'Richieste Premio',
+        'all-classes': 'Tutte le Classi',
+        'impostazioni': 'Impostazioni'
+      };
+      document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+      
+      // Load section-specific data
+      if (sectionId === 'classes') renderClasses();
+      if (sectionId === 'all-classes') renderAllClasses();
+      if (sectionId === 'history') loadHistory();
+      if (sectionId === 'requests') loadPendingRequests();
+    }
+
+    function renderClasses() {
+      const container = document.getElementById('classesContainer');
+      
+      if (myClasses.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🏫</div>
+            <div class="empty-state-title">Nessuna classe assegnata</div>
+            <div class="empty-state-text">Contatta l'amministratore per assegnarti delle classi</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4);">
+          ${myClasses.map(cls => {
+            const studentsInClass = myStudents.filter(s => s.classId === cls.id);
+            const totalBalance = studentsInClass.reduce((sum, s) => sum + (s.balance || 0), 0);
+            
+            return `
+              <div class="card" style="cursor: pointer;" onclick="filterByClass('${cls.id}')">
+                <div class="card-body">
+                  <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-2);">🏫 ${cls.name}</h3>
+                  <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <div style="display: flex; justify-content: space-between;">
+                      <span class="text-muted">Studenti:</span>
+                      <strong>${studentsInClass.length}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span class="text-muted">Saldo totale:</span>
+                      <strong class="${totalBalance < 0 ? 'text-danger' : 'text-success'}">${currencySymbol}${totalBalance}</strong>
+                    </div>
+                    ${cls.year ? `
+                      <div style="display: flex; justify-content: space-between;">
+                        <span class="text-muted">Anno:</span>
+                        <strong>${cls.year}</strong>
+                      </div>
+                    ` : ''}
+                  </div>
+                  <button class="btn btn-primary btn-sm w-full mt-3" onclick="event.stopPropagation(); viewClassStudents('${cls.id}')">
+                    👥 Vedi Studenti
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+    
+    function filterByClass(classId) {
+      document.getElementById('classSelector').value = classId;
+      onClassChange();
+    }
+    
+    function viewClassStudents(classId) {
+      document.getElementById('classSelector').value = classId;
+      onClassChange();
+      showSection('students');
+    }
+
+    async function loadHistory() {
+      const container = document.getElementById('historyList');
+      container.innerHTML = '<div class="text-center"><div class="spinner"></div></div>';
+      
+      try {
+        const transactions = await DB.getTransactions({ teacherId: Auth.currentUser.uid }, 50);
+        console.log('History transactions loaded:', transactions);
+        
+        if (transactions.length === 0) {
+          container.innerHTML = '<p class="text-muted text-center">Nessuna transazione</p>';
+          return;
+        }
+        
+        // Group transactions by icon, amount, reason, and similar timestamp (within 5 seconds)
+        const grouped = [];
+        const used = new Set();
+        
+        for (let i = 0; i < transactions.length; i++) {
+          if (used.has(i)) continue;
+          
+          const tx = transactions[i];
+          const group = {
+            icon: tx.icon || '⭐',
+            amount: tx.amount,
+            reason: tx.reason || 'Nessuna motivazione',
+            timestamp: tx.timestamp,
+            students: [tx.studentName || 'Studente'],
+            studentIds: [tx.studentId],
+            transactionIds: [tx.id]
+          };
+          
+          used.add(i);
+          
+          // Find similar transactions within 5 seconds
+          for (let j = i + 1; j < transactions.length; j++) {
+            if (used.has(j)) continue;
+            
+            const other = transactions[j];
+            const timeDiff = Math.abs(tx.timestamp - other.timestamp);
+            
+            if (timeDiff <= 5000 && 
+                other.amount === tx.amount && 
+                other.reason === tx.reason && 
+                (other.icon || '⭐') === (tx.icon || '⭐')) {
+              group.students.push(other.studentName || 'Studente');
+              group.studentIds.push(other.studentId);
+              group.transactionIds.push(other.id);
+              used.add(j);
+            }
+          }
+          
+          grouped.push(group);
+        }
+        
+        container.innerHTML = grouped.map((group, index) => `
+          <div class="transaction-item" style="background: white; border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3); box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
+            <div style="position: absolute; top: var(--space-3); right: var(--space-3); display: flex; gap: var(--space-2);">
+              <button class="btn btn-ghost btn-sm" onclick="editTransactionGroup(${index})" style="padding: var(--space-1) var(--space-2);">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteTransactionGroup(${index})" style="padding: var(--space-1) var(--space-2); color: var(--danger);">🗑️</button>
+            </div>
+            <div class="transaction-icon">${group.icon}</div>
+            <div class="transaction-info">
+              <div class="transaction-reason"><strong>Student${group.students.length > 1 ? 'i' : 'e'}:</strong> ${group.students.join(', ')}</div>
+              <div class="transaction-meta"><strong>Premio:</strong> ${group.amount >= 0 ? '+' : ''}${currencySymbol}${Math.abs(group.amount)}</div>
+              <div class="transaction-meta"><strong>Motivazione:</strong> ${group.reason}</div>
+              <div class="transaction-meta"><strong>Data:</strong> ${Format.relativeTime(group.timestamp)}</div>
+            </div>
+          </div>
+        `).join('');
+        
+        // Store grouped transactions for edit/delete operations
+        window.transactionGroups = grouped;
+      } catch (error) {
+        console.error('Error loading history:', error);
+        container.innerHTML = '<p class="text-muted text-center">Errore nel caricamento: ' + error.message + '</p>';
+      }
+    }
+
+    async function deleteTransactionGroup(groupIndex) {
+      const group = window.transactionGroups[groupIndex];
+      if (!group) return;
+      
+      const confirmed = await Modal.confirm(
+        `Vuoi eliminare ${group.transactionIds.length > 1 ? 'queste ' + group.transactionIds.length + ' transazioni' : 'questa transazione'}?`,
+        'Conferma Eliminazione'
+      );
+      
+      if (!confirmed) return;
+      
+      try {
+        // Delete all transactions in the group
+        for (const txId of group.transactionIds) {
+          await DB.deleteTransaction(txId);
+        }
+        
+        Toast.success('Transazione eliminata!');
+        await loadHistory();
+        await loadStats();
+        await loadMyStudents();
+      } catch (error) {
+        console.error('Error deleting transaction:', error);
+        Toast.error('Errore nell\'eliminazione');
+      }
+    }
+
+    async function editTransactionGroup(groupIndex) {
+      const group = window.transactionGroups[groupIndex];
+      if (!group) return;
+      
+      // Create a modal to edit the transaction
+      const modalHtml = `
+        <div id="editTransactionModalBackdrop" class="modal-backdrop active" style="display: block;"></div>
+        <div id="editTransactionModal" class="modal active" style="display: flex;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">✏️ Modifica Transazione</h3>
+              <button class="modal-close" onclick="closeEditTransactionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="input-group">
+                <label class="input-label">Icona</label>
+                <input type="text" id="editIcon" class="input" value="${group.icon}" maxlength="2" style="font-size: 1.5rem; text-align: center;">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Importo</label>
+                <input type="number" id="editAmount" class="input" value="${group.amount}">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Motivazione</label>
+                <input type="text" id="editReason" class="input" value="${group.reason}">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Studenti</label>
+                <div style="color: var(--text-muted);">${group.students.join(', ')}</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="closeEditTransactionModal()">Annulla</button>
+              <button class="btn btn-primary" id="saveEditBtn" onclick="saveEditedTransaction(${groupIndex})">💾 Salva</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Remove any existing edit modal
+      const existing = document.getElementById('editTransactionModal');
+      if (existing) existing.parentElement.remove();
+      
+      // Add modal to page
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = modalHtml;
+      while (tempDiv.firstChild) {
+        document.body.appendChild(tempDiv.firstChild);
+      }
+    }
+
+    function closeEditTransactionModal() {
+      const backdrop = document.getElementById('editTransactionModalBackdrop');
+      const modal = document.getElementById('editTransactionModal');
+      if (backdrop) backdrop.remove();
+      if (modal) modal.remove();
+    }
+
+    async function saveEditedTransaction(groupIndex) {
+      const group = window.transactionGroups[groupIndex];
+      if (!group) return;
+      
+      const newIcon = document.getElementById('editIcon').value.trim() || '⭐';
+      const newAmount = parseInt(document.getElementById('editAmount').value);
+      const newReason = document.getElementById('editReason').value.trim();
+      
+      if (isNaN(newAmount) || !newReason) {
+        Toast.warning('Compila tutti i campi');
+        return;
+      }
+      
+      const btn = document.getElementById('saveEditBtn');
+      const originalBtnText = btn.innerHTML;
+      
+      try {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Salvataggio...';
+        
+        // Calculate the difference to adjust student balances
+        const difference = newAmount - group.amount;
+        
+        // Update all transactions in the group
+        for (let i = 0; i < group.transactionIds.length; i++) {
+          await DB.updateTransaction(group.transactionIds[i], {
+            amount: newAmount,
+            reason: newReason,
+            icon: newIcon
+          });
+          
+          // Update student balance if amount changed
+          if (difference !== 0) {
+            await DB.adjustStudentBalance(group.studentIds[i], difference);
+          }
+        }
+        
+        Toast.success('Transazione modificata!');
+        closeEditTransactionModal();
+        await loadHistory();
+        await loadStats();
+        await loadMyStudents();
+      } catch (error) {
+        console.error('Error updating transaction:', error);
+        Toast.error('Errore nell\'aggiornamento: ' + error.message);
+        btn.disabled = false;
+        btn.innerHTML = originalBtnText;
+      }
+    }
+
+    // ===== All Classes Functions =====
+    
+    function renderAllClasses() {
+      const container = document.getElementById('allClassesContainer');
+      
+      if (allSchoolClasses.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🏫</div>
+            <div class="empty-state-title">Nessuna classe disponibile</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4);">
+          ${allSchoolClasses.map(cls => {
+            const studentsInClass = myStudents.filter(s => s.classId === cls.id);
+            const totalBalance = studentsInClass.reduce((sum, s) => sum + (s.balance || 0), 0);
+            const isMyClass = myClasses.some(c => c.id === cls.id);
+            
+            return `
+              <div class="card" style="cursor: pointer; ${isMyClass ? 'border: 2px solid var(--color-primary);' : ''}" onclick="viewClassDetails('${cls.id}')">
+                <div class="card-body">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                    <h3 style="font-size: var(--text-xl); margin: 0;">🏫 ${cls.name}</h3>
+                    ${isMyClass ? '<span style="background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Mia classe</span>' : ''}
+                  </div>
+                  ${cls.year ? `<p class="text-muted" style="margin-bottom: var(--space-3);">Anno: ${cls.year}</p>` : ''}
+                  <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <div style="display: flex; justify-content: space-between;">
+                      <span class="text-muted">Studenti:</span>
+                      <strong>${studentsInClass.length}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span class="text-muted">Saldo totale:</span>
+                      <strong class="${totalBalance < 0 ? 'text-danger' : 'text-success'}">${currencySymbol}${totalBalance}</strong>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary btn-sm w-full mt-3" onclick="event.stopPropagation(); filterByClass('${cls.id}'); showSection('students');">Vedi studenti</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+    
+    function viewClassDetails(classId) {
+      filterByClass(classId);
+      showSection('students');
+    }
+
+    // Settings functions
+    async function changeDisplayName() {
+      const newName = document.getElementById('newDisplayName').value.trim();
+      
+      if (!newName) {
+        showSettingsMessage('Inserisci un nome valido', 'error');
+        return;
+      }
+      
+      try {
+        const user = firebase.auth().currentUser;
+        
+        if (!user) {
+          showSettingsMessage('Utente non autenticato', 'error');
+          return;
+        }
+        
+        // Update Firebase Auth profile
+        await user.updateProfile({
+          displayName: newName
+        });
+        
+        // Update Firestore user document
+        await firebase.firestore().collection('users').doc(user.uid).update({
+          name: newName
+        });
+        
+        // Update UI
+        document.getElementById('userName').textContent = newName;
+        document.getElementById('dashboardUserName').textContent = newName;
+        document.getElementById('newDisplayName').value = '';
+        
+        showSettingsMessage('Nome aggiornato con successo! ✓', 'success');
+      } catch (error) {
+        console.error('Error updating name:', error);
+        showSettingsMessage('Errore durante l\'aggiornamento del nome: ' + error.message, 'error');
+      }
+    }
+
+    async function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        showSettingsMessage('Compila tutti i campi', 'error');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showSettingsMessage('Le nuove password non corrispondono', 'error');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        showSettingsMessage('La nuova password deve contenere almeno 6 caratteri', 'error');
+        return;
+      }
+      
+      try {
+        const user = firebase.auth().currentUser;
+        
+        if (!user || !user.email) {
+          showSettingsMessage('Utente non autenticato', 'error');
+          return;
+        }
+        
+        // Re-authenticate user
+        const credential = firebase.auth.EmailAuthProvider.credential(
+          user.email,
+          currentPassword
+        );
+        
+        await user.reauthenticateWithCredential(credential);
+        
+        // Update password
+        await user.updatePassword(newPassword);
+        
+        // Clear fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        showSettingsMessage('Password aggiornata con successo! ✓', 'success');
+      } catch (error) {
+        console.error('Error updating password:', error);
+        let errorMessage = 'Errore durante l\'aggiornamento della password';
+        
+        if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Password attuale non corretta';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage = 'La password è troppo debole';
+        }
+        
+        showSettingsMessage(errorMessage, 'error');
+      }
+    }
+
+    function showSettingsMessage(message, type) {
+      const messageDiv = document.getElementById('settingsMessage');
+      messageDiv.textContent = message;
+      messageDiv.style.display = 'block';
+      messageDiv.style.backgroundColor = type === 'success' ? 'var(--color-success-bg, #d4edda)' : 'var(--color-danger-bg, #f8d7da)';
+      messageDiv.style.color = type === 'success' ? 'var(--color-success, #155724)' : 'var(--color-danger, #721c24)';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
