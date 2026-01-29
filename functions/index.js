@@ -23,7 +23,7 @@ exports.createUser = functions.https.onCall(async (data, context) => {
   const callerUid = context.auth.uid;
   console.log('createUser called by:', callerUid);
   
-  // Ottieni il profilo del chiamante
+// Ottieni il profilo del chiamante
   const callerDoc = await db.collection('users').doc(callerUid).get();
   
   if (!callerDoc.exists) {
