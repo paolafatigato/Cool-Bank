@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Funzione helper: ottieni il ruolo dell'utente
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function getUserSchool() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Chiunque autenticato può leggere gli utenti
+      allow read: if request.auth != null;
+      
+      // SuperAdmin può creare qualsiasi utente
+      // Admin può creare utenti solo per la propria scuola
+      allow create: if request.auth != null && 
+        (getUserRole() == 'superadmin' || 
+         (getUserRole() == 'admin' && request.resource.data.schoolId == getUserSchool()));
+      
+      allow update: if request.auth != null && 
+        (getUserRole() == 'superadmin' || 
+         (getUserRole() == 'admin' && resource.data.schoolId == getUserSchool()));
+      
+      allow delete: if request.auth != null && 
+        (getUserRole() == 'superadmin' || 
+         (getUserRole() == 'admin' && resource.data.schoolId == getUserSchool()));
+    }
+    
+    // Schools collection
+    match /schools/{schoolId} {
+      // Lettura: utenti autenticati
+      allow read: if request.auth != null;
+      
+      // Scrittura: solo superadmin può creare/eliminare scuole
+      allow create, delete: if request.auth != null && getUserRole() == 'superadmin';
+      
+      // Update: superadmin o admin della scuola
+      allow update: if request.auth != null && 
+        (getUserRole() == 'superadmin' || 
+         (getUserRole() == 'admin' && getUserSchool() == schoolId));
+      
+      // Subcollections (students, classes, rewards, etc.)
+      match /{subcollection}/{docId} {
+        allow read: if request.auth != null;
+        
+        allow write: if request.auth != null && 
+          (getUserRole() == 'superadmin' || 
+           getUserSchool() == schoolId);
+      }
+    }
+  }
+}
