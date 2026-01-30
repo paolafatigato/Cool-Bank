@@ -30,6 +30,51 @@
     .management-tab { padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); border: 2px solid var(--border); background: var(--surface); cursor: pointer; font-weight: var(--font-medium); transition: all var(--transition-fast); }
     .management-tab:hover { border-color: var(--primary-light); }
     .management-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    /* Responsive per smartphone */
+    @media (max-width: 768px) {
+      .schools-grid { 
+        grid-template-columns: 1fr; 
+        gap: var(--space-4);
+      }
+      .school-card { 
+        padding: var(--space-4); 
+      }
+      .school-card-stats { 
+        flex-wrap: wrap;
+      }
+      .school-stat {
+        flex: 1 0 45%;
+        min-width: 100px;
+      }
+      .management-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+      }
+      .management-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .school-card-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+      }
+      .school-card-name {
+        font-size: var(--text-lg);
+      }
+      .school-stat-value {
+        font-size: var(--text-xl);
+      }
+      .school-card-actions .btn {
+        flex: 1;
+        min-width: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -67,6 +112,7 @@
 
     <main class="main-content">
       <header class="main-header">
+        <button class="mobile-menu-btn" onclick="UI.toggleSidebar()">☰</button>
         <div>
           <h1 id="pageTitle" class="page-title">Gestione Scuole</h1>
           <p class="text-muted" style="font-size:var(--text-sm);">Pannello Super Admin</p>
@@ -227,12 +273,14 @@
 
   <!-- Class Modal -->
   <div id="classModalBackdrop" class="modal-backdrop"></div>
-  <div id="classModal" class="modal">
+  <div id="classModal" class="modal" style="max-width: 700px;">
     <div class="modal-header"><h3 class="modal-title" id="classModalTitle">Classe</h3><button class="modal-close" onclick="Modal.hide('classModal')">×</button></div>
     <div class="modal-body">
       <input type="hidden" id="editClassId">
       <div class="input-group"><label class="input-label">Nome Classe *</label><input type="text" id="className" class="input" placeholder="Es: 1A" required></div>
       <div class="input-group"><label class="input-label">Descrizione</label><input type="text" id="classDescription" class="input" placeholder="Es: Prima A"></div>
+      <div class="input-group"><label class="input-label">Elenco Alunni (separati da ; )</label><textarea id="classStudents" class="input" placeholder="Es: Rossi Mario; Bianchi Luca; Verdi Anna" rows="4" style="resize: vertical;"></textarea><small class="text-muted" style="font-size: var(--text-xs); margin-top: 4px; display: block;">Modifica i nomi per correggere errori. I cambiamenti si applicheranno in tutti i campi. Aggiungi nuovi studenti con formato: Cognome Nome</small></div>
+      <div class="input-group"><label class="input-label">Elenco Professori (separati da ; )</label><textarea id="classTeachers" class="input" placeholder="Es: Prof. Rossi; Prof. Bianchi" rows="3" style="resize: vertical;"></textarea><small class="text-muted" style="font-size: var(--text-xs); margin-top: 4px; display: block;">Solo per visualizzazione. I professori vanno gestiti nella sezione Docenti.</small></div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('classModal')">Annulla</button><button class="btn btn-primary" onclick="saveClass()">Salva</button></div>
   </div>
@@ -374,8 +422,27 @@ oppure copia/incolla da Excel!"></textarea>
     let schoolQuickRewards = [];
 
     async function init() {
-      await Dashboard.init();
-      if (!Auth.requireAuth(['superadmin'])) return;
+      // Wait for authentication to be fully initialized
+      await Auth.init();
+      
+      // Check auth and permissions
+      if (!Auth.currentUser || !Auth.userProfile) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Check role
+      if (Auth.userProfile.role !== 'superadmin') {
+        Toast.error('Non hai i permessi per accedere a questa pagina');
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Initialize dashboard
+      Dashboard.renderUserInfo();
+      UI.renderImpersonationBanner();
+      await Dashboard.loadSchoolInfo();
+      
       UserManager.init();
       await loadSchools();
     }
@@ -583,10 +650,10 @@ oppure copia/incolla da Excel!"></textarea>
       const container = document.getElementById('classesContainer');
       if (!schoolClasses.length) { container.innerHTML = '<p class="text-muted">Nessuna classe</p>'; return; }
       
-      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Nome</th><th>Studenti</th><th>Azioni</th></tr></thead><tbody>
+      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th style="width: 60%;">Nome</th><th style="width: 20%; text-align: center;">Studenti</th><th style="width: 20%; text-align: center;">Azioni</th></tr></thead><tbody>
         ${schoolClasses.map(c => {
           const count = schoolStudents.filter(s => s.classId === c.id).length;
-          return `<tr><td><strong>${c.name}</strong></td><td>${count}</td><td><div class="actions">
+          return `<tr><td><strong>${c.name}</strong></td><td style="text-align: center;">${count}</td><td style="text-align: center;"><div class="actions">
             <button class="btn btn-ghost btn-sm" onclick="editClass('${c.id}')">✏️</button>
             <button class="btn btn-ghost btn-sm text-danger" onclick="deleteClass('${c.id}')">🗑️</button>
           </div></td></tr>`;
@@ -599,6 +666,22 @@ oppure copia/incolla da Excel!"></textarea>
       document.getElementById('editClassId').value = cls?.id || '';
       document.getElementById('className').value = cls?.name || '';
       document.getElementById('classDescription').value = cls?.description || '';
+      
+      // Popola elenco studenti della classe
+      if (cls?.id) {
+        const classStudents = schoolStudents.filter(s => s.classId === cls.id);
+        const studentNames = classStudents.map(s => s.name).join('; ');
+        document.getElementById('classStudents').value = studentNames;
+        
+        // Popola elenco professori della classe
+        const classTeachers = schoolTeachers.filter(t => (t.classes || []).includes(cls.id));
+        const teacherNames = classTeachers.map(t => t.name).join('; ');
+        document.getElementById('classTeachers').value = teacherNames;
+      } else {
+        document.getElementById('classStudents').value = '';
+        document.getElementById('classTeachers').value = '';
+      }
+      
       Modal.show('classModal');
     }
 
@@ -610,11 +693,73 @@ oppure copia/incolla da Excel!"></textarea>
       if (!data.name) { Toast.warning('Inserisci il nome'); return; }
       
       const ref = db.collection('schools').doc(currentSchoolId).collection('classes');
-      if (id) await ref.doc(id).update(data);
-      else await ref.add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      let classId = id;
+      if (id) {
+        await ref.doc(id).update(data);
+      } else {
+        const newClassRef = await ref.add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        classId = newClassRef.id;
+      }
+      
+      // Gestisci gli studenti
+      if (classId) {
+        const studentsText = document.getElementById('classStudents').value.trim();
+        if (studentsText) {
+          // Parse l'elenco studenti
+          const newStudentNames = studentsText.split(';').map(n => n.trim()).filter(n => n);
+          
+          // Ottieni gli studenti attuali della classe
+          const currentClassStudents = schoolStudents.filter(s => s.classId === classId);
+          const currentStudentNames = currentClassStudents.map(s => s.name);
+          
+          // Identifica studenti da aggiornare, aggiungere o eliminare
+          const updates = [];
+          const studentsRef = db.collection('schools').doc(currentSchoolId).collection('students');
+          
+          // 1. Aggiorna i nomi degli studenti esistenti o aggiungi nuovi
+          for (let i = 0; i < newStudentNames.length; i++) {
+            const newName = newStudentNames[i];
+            const oldStudent = currentClassStudents[i];
+            
+            if (oldStudent) {
+              // Studente esistente - aggiorna il nome se cambiato
+              if (oldStudent.name !== newName) {
+                updates.push(studentsRef.doc(oldStudent.id).update({ 
+                  name: newName,
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }));
+                Toast.info(`Aggiornato: ${oldStudent.name} → ${newName}`);
+              }
+            } else {
+              // Nuovo studente - crea
+              updates.push(studentsRef.add({ 
+                name: newName, 
+                classId: classId,
+                className: data.name,
+                balance: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              }));
+              Toast.success(`Aggiunto studente: ${newName}`);
+            }
+          }
+          
+          // 2. Rimuovi studenti in eccesso (se la lista è più corta)
+          if (newStudentNames.length < currentClassStudents.length) {
+            for (let i = newStudentNames.length; i < currentClassStudents.length; i++) {
+              const studentToRemove = currentClassStudents[i];
+              // Non eliminiamo lo studente, solo lo spostiamo in una classe vuota o lo teniamo
+              // Per sicurezza, non facciamo nulla per evitare perdite di dati
+              Toast.warning(`Studente non rimosso: ${studentToRemove.name}. Eliminalo manualmente se necessario.`);
+            }
+          }
+          
+          await Promise.all(updates);
+        }
+      }
       
       Modal.hide('classModal');
       await loadSchoolClasses();
+      await loadSchoolStudents();
       renderClasses();
       populateStudentClassFilter();
       Toast.success('Salvato!');

@@ -19,7 +19,7 @@
         <div class="nav-section">
           <div class="nav-section-title">Panoramica</div>
           <button class="nav-item active" data-nav="dashboard" onclick="showSection('dashboard')">
-            <span class="nav-item-icon">🏠</span> Dashboard
+            <span class="nav-item-icon">🏠</span> Home
           </button>
         </div>
         <div class="nav-section">
@@ -51,22 +51,27 @@
         </div>
       </nav>
       <div class="sidebar-footer">
-        <div class="user-menu" onclick="LoginPage.handleLogout()">
+        <div class="user-menu" onclick="LoginPage.handleLogout()" title="Clicca per uscire">
           <div id="userAvatar" class="avatar">AD</div>
           <div class="user-info">
             <div id="userName" class="user-name">Admin</div>
             <div id="userRole" class="user-role">Amministratore</div>
           </div>
-          <span>🚪</span>
+          <span style="font-size:1.2rem;">🚪</span>
         </div>
       </div>
     </aside>
 
     <main class="main-content">
       <header class="main-header">
-        <div>
-          <h1 id="pageTitle" class="page-title">Dashboard</h1>
-          <p id="schoolName" class="text-muted" style="font-size:var(--text-sm);">SchoolBank</p>
+        <div style="display:flex;align-items:center;gap:var(--space-3);">
+          <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Menu">
+            <span style="font-size:1.5rem;">☰</span>
+          </button>
+          <div>
+            <h1 id="pageTitle" class="page-title">Home</h1>
+            <p id="schoolName" class="text-muted" style="font-size:var(--text-sm);">SchoolBank</p>
+          </div>
         </div>
         <div class="header-actions">
           <button class="btn btn-secondary" onclick="exportStudents()">📥 Esporta</button>
@@ -77,12 +82,12 @@
         <!-- Dashboard -->
         <section id="dashboardSection" class="page-section">
           <div class="stats-grid">
-            <div class="stat-card"><div class="stat-icon primary">👥</div><div class="stat-content"><div id="statStudents" class="stat-value">0</div><div class="stat-label">Studenti</div></div></div>
-            <div class="stat-card"><div class="stat-icon info">👨‍🏫</div><div class="stat-content"><div id="statTeachers" class="stat-value">0</div><div class="stat-label">Docenti</div></div></div>
-            <div class="stat-card"><div class="stat-icon warning">🏫</div><div class="stat-content"><div id="statClasses" class="stat-value">0</div><div class="stat-label">Classi</div></div></div>
-            <div class="stat-card"><div class="stat-icon success">💰</div><div class="stat-content"><div id="statBalance" class="stat-value">$0</div><div class="stat-label">Saldo Totale</div></div></div>
+            <div class="stat-card" onclick="showSection('students')" style="cursor:pointer;" title="Vai a Studenti"><div class="stat-icon primary">👥</div><div class="stat-content"><div id="statStudents" class="stat-value">0</div><div class="stat-label">Studenti</div></div></div>
+            <div class="stat-card" onclick="showSection('teachers')" style="cursor:pointer;" title="Vai a Docenti"><div class="stat-icon info">👨‍🏫</div><div class="stat-content"><div id="statTeachers" class="stat-value">0</div><div class="stat-label">Docenti</div></div></div>
+            <div class="stat-card" onclick="showSection('classes')" style="cursor:pointer;" title="Vai a Classi"><div class="stat-icon warning">🏫</div><div class="stat-content"><div id="statClasses" class="stat-value">0</div><div class="stat-label">Classi</div></div></div>
+            <div class="stat-card" onclick="showSection('students')" style="cursor:pointer;" title="Vai a Studenti"><div class="stat-icon success">💰</div><div class="stat-content"><div id="statBalance" class="stat-value">$0</div><div class="stat-label">Saldo Totale</div></div></div>
           </div>
-          <div class="card mt-6"><div class="card-header"><h3 class="card-title">🏆 Top Studenti</h3></div><div class="card-body" id="topStudentsContainer"></div></div>
+          <div class="card mt-6"><div class="card-header"><h3 class="card-title">🏆 Studenti più Meritevoli</h3><p class="text-muted" style="font-size:var(--text-sm);margin:0;">Classifica basata sul totale dei soldi ricevuti</p></div><div class="card-body" id="topStudentsContainer"></div></div>
         </section>
 
         <!-- Students -->
@@ -180,11 +185,13 @@
 
   <!-- Class Modal -->
   <div id="classModalBackdrop" class="modal-backdrop"></div>
-  <div id="classModal" class="modal">
+  <div id="classModal" class="modal" style="max-width: 700px;">
     <div class="modal-header"><h3 class="modal-title">Classe</h3><button class="modal-close" onclick="Modal.hide('classModal')">×</button></div>
     <div class="modal-body">
       <input type="hidden" id="classId">
       <div class="input-group"><label class="input-label">Nome *</label><input type="text" id="className" class="input" placeholder="Es: 1A" required></div>
+      <div class="input-group"><label class="input-label">Elenco Alunni (separati da ; )</label><textarea id="classStudents" class="input" placeholder="Es: Rossi Mario; Bianchi Luca; Verdi Anna" rows="4" style="resize: vertical;"></textarea><small class="text-muted" style="font-size: var(--text-xs); margin-top: 4px; display: block;">Modifica i nomi per correggere errori. I cambiamenti si applicheranno in tutti i campi. Aggiungi nuovi studenti con formato: Cognome Nome</small></div>
+      <div class="input-group"><label class="input-label">Elenco Professori (separati da ; )</label><textarea id="classTeachers" class="input" placeholder="Es: Prof. Rossi; Prof. Bianchi" rows="3" style="resize: vertical;"></textarea><small class="text-muted" style="font-size: var(--text-xs); margin-top: 4px; display: block;">Solo per visualizzazione. I professori vanno gestiti nella sezione Docenti.</small></div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.hide('classModal')">Annulla</button><button class="btn btn-primary" onclick="saveClass()">Salva</button></div>
   </div>
@@ -328,6 +335,28 @@ oppure copia/incolla da Excel!"></textarea>
   <script>
     let students=[], classes=[], rewards=[], quickRewards=[], teachers=[], config={}, sym='$';
 
+    // Mobile sidebar toggle
+    function toggleMobileSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      const sidebar = document.querySelector('.sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+          closeMobileSidebar();
+        }
+      }
+    });
+
     async function init() {
       await Dashboard.init();
       if (!Auth.requireAuth(['admin'])) return;
@@ -355,7 +384,7 @@ oppure copia/incolla da Excel!"></textarea>
       renderTeachers();
       renderRewards();
       renderQuickRewards();
-      renderTopStudents();
+      await renderTopStudents();
     }
 
     function updateStats() {
@@ -404,12 +433,13 @@ oppure copia/incolla da Excel!"></textarea>
       const container = document.getElementById('classesContainer');
       if (!classes.length) { container.innerHTML = '<p class="text-muted">Nessuna classe</p>'; return; }
       
-      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Nome</th><th>Studenti</th><th>Azioni</th></tr></thead><tbody>
+      container.innerHTML = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th style="width: 60%;">Nome</th><th style="width: 20%; text-align: center;">Studenti</th><th style="width: 20%; text-align: center;">Azioni</th></tr></thead><tbody>
         ${classes.map(c => {
           const count = students.filter(s=>s.classId===c.id).length;
-          return `<tr><td><strong>${c.name}</strong></td><td>${count}</td><td>
+          return `<tr><td><strong>${c.name}</strong></td><td style="text-align: center;">${count}</td><td style="text-align: center;">
             <button class="btn btn-ghost btn-sm" onclick="editClass('${c.id}')">✏️</button>
             <button class="btn btn-ghost btn-sm text-danger" onclick="deleteClass('${c.id}')">🗑️</button>
+            </div>
           </td></tr>`;
         }).join('')}
       </tbody></table></div>`;
@@ -443,16 +473,39 @@ oppure copia/incolla da Excel!"></textarea>
       `).join('');
     }
 
-    function renderTopStudents() {
+    async function renderTopStudents() {
       const container = document.getElementById('topStudentsContainer');
-      const sorted = [...students].sort((a,b)=>(b.balance||0)-(a.balance||0)).slice(0,10);
+      if (!students.length) { container.innerHTML = '<p class="text-muted">Nessuno studente</p>'; return; }
+      
+      // Calculate totalEarned for each student from transactions
+      const studentsWithEarnings = await Promise.all(
+        students.map(async student => {
+          const transactions = await db.collection('schools')
+            .doc(Auth.getEffectiveSchoolId())
+            .collection('transactions')
+            .where('studentId', '==', student.id)
+            .get();
+          
+          const totalEarned = transactions.docs.reduce((sum, doc) => {
+            const amount = doc.data().amount || 0;
+            return amount > 0 ? sum + amount : sum;
+          }, 0);
+          
+          return { ...student, totalEarned };
+        })
+      );
+      
+      const sorted = studentsWithEarnings
+        .sort((a,b) => b.totalEarned - a.totalEarned)
+        .slice(0, 10);
+      
       if (!sorted.length) { container.innerHTML = '<p class="text-muted">Nessuno studente</p>'; return; }
       
       container.innerHTML = sorted.map((s,i) => `
         <div class="leaderboard-item">
           <div class="leaderboard-rank" style="${i<3?'background:'+['gold','silver','#CD7F32'][i]:''}">${i+1}</div>
           <div class="leaderboard-name">${s.name}</div>
-          <div class="leaderboard-balance">${sym}${s.balance||0}</div>
+          <div class="leaderboard-balance">${sym}${s.totalEarned||0}</div>
         </div>
       `).join('');
     }
@@ -498,6 +551,22 @@ oppure copia/incolla da Excel!"></textarea>
     function openClassModal(c=null) {
       document.getElementById('classId').value = c?.id || '';
       document.getElementById('className').value = c?.name || '';
+      
+      // Popola elenco studenti della classe
+      if (c?.id) {
+        const classStudents = students.filter(s => s.classId === c.id);
+        const studentNames = classStudents.map(s => s.name).join('; ');
+        document.getElementById('classStudents').value = studentNames;
+        
+        // Popola elenco professori della classe
+        const classTeachers = teachers.filter(t => (t.classes || []).includes(c.id));
+        const teacherNames = classTeachers.map(t => t.name).join('; ');
+        document.getElementById('classTeachers').value = teacherNames;
+      } else {
+        document.getElementById('classStudents').value = '';
+        document.getElementById('classTeachers').value = '';
+      }
+      
       Modal.show('classModal');
     }
 
@@ -508,8 +577,64 @@ oppure copia/incolla da Excel!"></textarea>
       const name = document.getElementById('className').value.trim();
       if (!name) { Toast.warning('Inserisci il nome'); return; }
       
-      if (id) await DB.updateClass(id, {name});
-      else await DB.createClass({name});
+      // Salva o aggiorna la classe
+      let classId = id;
+      if (id) {
+        await DB.updateClass(id, {name});
+      } else {
+        classId = await DB.createClass({name});
+      }
+      
+      // Gestisci gli studenti
+      if (classId) {
+        const studentsText = document.getElementById('classStudents').value.trim();
+        if (studentsText) {
+          // Parse l'elenco studenti
+          const newStudentNames = studentsText.split(';').map(n => n.trim()).filter(n => n);
+          
+          // Ottieni gli studenti attuali della classe
+          const currentClassStudents = students.filter(s => s.classId === classId);
+          const currentStudentNames = currentClassStudents.map(s => s.name);
+          
+          // Identifica studenti da aggiornare, aggiungere o eliminare
+          const updates = [];
+          
+          // 1. Aggiorna i nomi degli studenti esistenti o aggiungi nuovi
+          for (let i = 0; i < newStudentNames.length; i++) {
+            const newName = newStudentNames[i];
+            const oldStudent = currentClassStudents[i];
+            
+            if (oldStudent) {
+              // Studente esistente - aggiorna il nome se cambiato
+              if (oldStudent.name !== newName) {
+                updates.push(DB.updateStudent(oldStudent.id, { name: newName }));
+                Toast.info(`Aggiornato: ${oldStudent.name} → ${newName}`);
+              }
+            } else {
+              // Nuovo studente - crea
+              updates.push(DB.createStudent({ 
+                name: newName, 
+                classId: classId,
+                className: name
+              }));
+              Toast.success(`Aggiunto studente: ${newName}`);
+            }
+          }
+          
+          // 2. Rimuovi studenti in eccesso (se la lista è più corta)
+          if (newStudentNames.length < currentClassStudents.length) {
+            for (let i = newStudentNames.length; i < currentClassStudents.length; i++) {
+              const studentToRemove = currentClassStudents[i];
+              // Non eliminiamo lo studente, solo lo spostiamo in una classe vuota o lo teniamo
+              // Per sicurezza, non facciamo nulla per evitare perdite di dati
+              Toast.warning(`Studente non rimosso: ${studentToRemove.name}. Eliminalo manualmente se necessario.`);
+            }
+          }
+          
+          await Promise.all(updates);
+        }
+      }
+      
       Modal.hide('classModal');
       await loadData();
       Toast.success('Salvato!');
@@ -952,11 +1077,12 @@ oppure copia/incolla da Excel!"></textarea>
     }
 
     function showSection(id) {
+      closeMobileSidebar(); // Close mobile sidebar when navigating
       document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id+'Section')?.classList.remove('hidden');
       UI.setActiveNav(id);
-      const titles = {dashboard:'Dashboard',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
-      document.getElementById('pageTitle').textContent = titles[id] || 'Dashboard';
+      const titles = {dashboard:'Home',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
+      document.getElementById('pageTitle').textContent = titles[id] || 'Home';
     }
 
     // === BULK STUDENT IMPORT FUNCTIONS ===
@@ -1113,11 +1239,12 @@ oppure copia/incolla da Excel!"></textarea>
     }
 
     function showSection(id) {
+      closeMobileSidebar(); // Close mobile sidebar when navigating
       document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id+'Section')?.classList.remove('hidden');
       UI.setActiveNav(id);
-      const titles = {dashboard:'Dashboard',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
-      document.getElementById('pageTitle').textContent = titles[id] || 'Dashboard';
+      const titles = {dashboard:'Home',students:'Studenti',classes:'Classi',teachers:'Docenti',rewards:'Ricompense',quickrewards:'Ricompense Rapide',settings:'Impostazioni'};
+      document.getElementById('pageTitle').textContent = titles[id] || 'Home';
     }
 
     document.addEventListener('DOMContentLoaded', init);

@@ -5,18 +5,18 @@
 
 :root {
   /* === COLORI PRINCIPALI === */
-  --primary: #7B4B8C;           /* Viola profondo - più raffinato */
-  --primary-light: #9D6BAD;
-  --primary-dark: #5A3567;
-  --primary-rgb: 123, 75, 140;
+  --primary: #9333EA;           /* Viola brillante - hsla(270,100%,62%) */
+  --primary-light: #C084FC;
+  --primary-dark: #7E22CE;
+  --primary-rgb: 147, 51, 234;
   
-  --secondary: #F5A623;         /* Arancione dorato */
-  --secondary-light: #FFD080;
-  --secondary-dark: #D4850F;
+  --secondary: #FFA033;         /* Arancione vibrante - hsla(29,100%,62%) */
+  --secondary-light: #FFC266;
+  --secondary-dark: #FF8800;
   
-  --accent: #E85A4F;            /* Rosso corallo */
-  --accent-light: #FF8A82;
-  --accent-dark: #C43D33;
+  --accent: #F553A6;            /* Rosa acceso - hsla(328,87%,69%) */
+  --accent-light: #FF80C3;
+  --accent-dark: #E61E82;
   
   /* === STATI === */
   --success: #2ECC71;
@@ -30,12 +30,12 @@
   --danger-light: #F5B7B1;
   --danger-dark: #C0392B;
   
-  --info: #3498DB;
-  --info-light: #D4E6F1;
+  --info: #33CCA6;            /* Ciano vibrante - hsla(166,100%,62%) */
+  --info-light: #80E6C8;
   
   /* === NEUTRALI === */
-  --background: #F8F6FA;        /* Leggermente viola */
-  --background-alt: #EFEAF2;
+  --background: #FFF5FA;        /* Leggermente rosa */
+  --background-alt: #FFE8F5;
   --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
   
@@ -54,7 +54,7 @@
   --shadow-md: 0 4px 12px rgba(44, 32, 54, 0.08);
   --shadow-lg: 0 8px 24px rgba(44, 32, 54, 0.12);
   --shadow-xl: 0 16px 48px rgba(44, 32, 54, 0.16);
-  --shadow-glow: 0 0 20px rgba(123, 75, 140, 0.25);
+  --shadow-glow: 0 0 20px rgba(147, 51, 234, 0.25);
   
   /* === TIPOGRAFIA === */
   --font-primary: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

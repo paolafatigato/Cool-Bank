@@ -9,6 +9,69 @@
   
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* Gradient background with blur overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      transition: opacity 1.5s ease;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      backdrop-filter: blur(80px);
+      background: rgba(255, 255, 255, 0.85);
+    }
+    
+    body.grad1::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 86% 61%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 60% 19%, hsla(346,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 10% 19%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 85% 15%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 45% 79%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 22% 64%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 50% 56%, hsla(328,87%,69%,1) 0px, transparent 50%);
+    }
+    
+    body.grad2::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 27% 1%, hsla(346,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 99% 86%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 65% 23%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 36% 32%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 89% 58%, hsla(18,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 19% 37%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 14% 93%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 19% 77%, hsla(328,87%,69%,1) 0px, transparent 50%);
+    }
+    
+    body.grad3::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 92% 44%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 78% 75%, hsla(328,87%,69%,1) 0px, transparent 50%),
+        radial-gradient(at 27% 42%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 72% 17%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 24% 7%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 94% 5%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 52% 71%, hsla(346,100%,62%,1) 0px, transparent 50%);
+    }
+  </style>
 </head>
 <body>
   <div class="app-container" id="appContainer">
@@ -62,13 +125,13 @@
       </nav>
       
       <div class="sidebar-footer">
-        <div class="user-menu" onclick="LoginPage.handleLogout()">
+        <div class="user-menu" onclick="LoginPage.handleLogout()" title="Clicca per uscire">
           <div id="userAvatar" class="avatar">TD</div>
           <div class="user-info">
             <div id="userName" class="user-name">Prof. Docente</div>
             <div id="userRole" class="user-role">Docente</div>
           </div>
-          <span>🚪</span>
+          <span style="font-size:1.2rem;">🚪</span>
         </div>
       </div>
     </aside>
@@ -76,9 +139,14 @@
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
       <header class="main-header" id="mainHeader">
-        <div>
-          <h1 id="pageTitle" class="page-title">Dashboard</h1>
-          <p id="schoolName" class="text-muted" style="font-size: var(--text-sm);">SchoolBank</p>
+        <div style="display:flex;align-items:center;gap:var(--space-3);">
+          <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Menu">
+            <span style="font-size:1.5rem;">☰</span>
+          </button>
+          <div>
+            <h1 id="pageTitle" class="page-title">Home</h1>
+            <p id="schoolName" class="text-muted" style="font-size: var(--text-sm);">SchoolBank</p>
+          </div>
         </div>
         <div class="header-actions">
           <select id="classSelector" class="input" style="width: auto; min-width: 150px;" onchange="onClassChange()">
@@ -153,9 +221,9 @@
               <div class="input-group">
                 <label class="input-label">Premio Personalizzato</label>
                 <div style="display: flex; gap: var(--space-3);">
-                  <input type="text" id="customEmoji" class="input" placeholder="Emoji" value="⭐" style="width: 70px; text-align: center; font-size: 1.5rem;" maxlength="2">
-                  <input type="number" id="customAmount" class="input" placeholder="Importo" style="width: 120px;">
-                  <input type="text" id="customReason" class="input" placeholder="Motivazione">
+                  <input type="text" id="customEmoji" class="input" placeholder="🎁" value="⭐" style="width: 50px; height: 50px; text-align: center; font-size: 1.5rem; border-radius: 50%; padding: 0; flex-shrink: 0;" maxlength="2">
+                  <input type="number" id="customAmount" class="input" placeholder="999" style="width: 70px; flex-shrink: 0;">
+                  <input type="text" id="customReason" class="input" placeholder="Motivazione" style="flex: 1;">
                 </div>
               </div>
               
@@ -193,9 +261,19 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">👥 I Miei Studenti</h3>
-              <div class="search-bar">
-                <span class="search-bar-icon">🔍</span>
-                <input type="text" class="input" placeholder="Cerca studente..." oninput="filterStudents(this.value)">
+              <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;">
+                <div class="search-bar">
+                  <span class="search-bar-icon">🔍</span>
+                  <input type="text" class="input" placeholder="Cerca studente..." oninput="filterStudents(this.value)">
+                </div>
+                <div style="display: flex; gap: var(--space-2);">
+                  <button class="btn btn-ghost btn-sm" onclick="toggleNameFormat()" title="Cambia formato nome">
+                    <span id="nameFormatIcon">🔤</span>
+                  </button>
+                  <button class="btn btn-ghost btn-sm" onclick="sortStudentsByLastName()" title="Ordina per cognome">
+                    📊
+                  </button>
+                </div>
               </div>
             </div>
             <div class="card-body">
@@ -308,6 +386,11 @@
   <script src="js/universaladmin.js"></script>
 
   <script>
+    // Apply random gradient on page load
+    const gradients = ['grad1', 'grad2', 'grad3'];
+    const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+    document.body.classList.add(randomGradient);
+    
     let myClasses = [];
     let allSchoolClasses = [];
     let myStudents = [];
@@ -316,6 +399,30 @@
     let currentQuickReward = null;
     let currencySymbol = '$';
     let tempSelectedClasses = []; // For manage classes section
+    let nameFormat = 'firstBold'; // 'firstBold' or 'lastBold'
+    let sortMode = 'none'; // 'none', 'lastName', 'firstName'
+
+    // Mobile sidebar toggle
+    function toggleMobileSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      const sidebar = document.querySelector('.sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+          closeMobileSidebar();
+        }
+      }
+    });
 
     async function init() {
       await Dashboard.init();
@@ -395,6 +502,30 @@
       renderStudentsTable();
     }
 
+    function parseStudentName(fullName) {
+      // Parse name assuming format "Cognome Nome" or "Cognome Nome, Cognome Nome"
+      const parts = fullName.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const lastName = parts[0];
+        const firstName = parts.slice(1).join(' ');
+        return { lastName, firstName };
+      }
+      // Fallback if only one part
+      return { lastName: fullName, firstName: '' };
+    }
+
+    function formatStudentName(fullName) {
+      const { lastName, firstName } = parseStudentName(fullName);
+      
+      if (nameFormat === 'firstBold') {
+        // Nome in grassetto, cognome sottile
+        return `<strong style="font-weight: var(--font-bold);">${firstName}</strong> <span style="font-weight: var(--font-normal);">${lastName}</span>`;
+      } else {
+        // Cognome in grassetto, nome sottile
+        return `<strong style="font-weight: var(--font-bold);">${lastName}</strong> <span style="font-weight: var(--font-normal);">${firstName}</span>`;
+      }
+    }
+
     function renderStudentSelects() {
       const grids = ['studentSelectGrid', 'modalStudentGrid'];
       
@@ -407,13 +538,20 @@
           return;
         }
         
-        grid.innerHTML = myStudents.map(student => `
-          <div class="student-select-card" data-student-id="${student.id}" onclick="toggleStudentSelection('${student.id}', '${gridId}')">
-            <div class="avatar">${UI.getInitials(student.name)}</div>
-            <div class="student-select-name">${student.name}</div>
-            <div class="student-select-balance">${currencySymbol}${student.balance || 0}</div>
-          </div>
-        `).join('');
+        grid.innerHTML = myStudents.map(student => {
+          const { lastName, firstName } = parseStudentName(student.name);
+          const displayName = nameFormat === 'firstBold' 
+            ? `<strong>${firstName}</strong> ${lastName}`
+            : `<strong>${lastName}</strong> ${firstName}`;
+          
+          return `
+            <div class="student-select-card" data-student-id="${student.id}" onclick="toggleStudentSelection('${student.id}', '${gridId}')">
+              <div class="avatar">${UI.getInitials(student.name)}</div>
+              <div class="student-select-name">${displayName}</div>
+              <div class="student-select-balance">${currencySymbol}${student.balance || 0}</div>
+            </div>
+          `;
+        }).join('');
       });
     }
 
@@ -538,16 +676,24 @@
         Modal.hide('quickRewardModal');
         selectedStudents.clear();
         
-        await loadMyStudents();
-        await loadStats();
-        await loadRecentTransactions();
-        
       } catch (error) {
         console.error('Errore:', error);
         Toast.error('Errore nell\'assegnazione del premio');
-      } finally {
         btn.disabled = false;
         btn.textContent = 'Assegna';
+        return;
+      }
+      
+      btn.disabled = false;
+      btn.textContent = 'Assegna';
+      
+      // Update data after successful reward assignment
+      try {
+        await loadMyStudents();
+        await loadStats();
+        await loadRecentTransactions();
+      } catch (error) {
+        console.error('Errore nell\'aggiornamento dati:', error);
       }
     }
 
@@ -578,16 +724,23 @@
         document.getElementById('customEmoji').value = '⭐';
         selectedStudents.clear();
         renderStudentSelects();
-        
-        await loadMyStudents();
-        await loadStats();
-        await loadRecentTransactions();
+        updateRewardButton();
         
       } catch (error) {
         console.error('Errore:', error);
         Toast.error('Errore nell\'assegnazione del premio');
-      } finally {
-        updateRewardButton();
+        btn.disabled = false;
+        btn.innerHTML = '⭐ Assegna Premio';
+        return;
+      }
+      
+      // Update data after successful reward assignment
+      try {
+        await loadMyStudents();
+        await loadStats();
+        await loadRecentTransactions();
+      } catch (error) {
+        console.error('Errore nell\'aggiornamento dati:', error);
       }
     }
 
@@ -683,20 +836,29 @@
       const empty = document.getElementById('noRequests');
       
       try {
-        // Carica solo le richieste indirizzate a questo professore
+        // Carica tutte le richieste indirizzate a questo professore
         const snapshot = await DB.school('rewardRequests')
           .where('teacherId', '==', Auth.currentUser.uid)
-          .where('status', '==', 'pending')
           .get();
         
-        let requests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        let allRequests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         
-        // Ordina per data in JavaScript
-        requests.sort((a, b) => {
+        // Separa richieste pending e già gestite
+        const pendingRequests = allRequests.filter(req => req.status === 'pending');
+        const handledRequests = allRequests.filter(req => req.status !== 'pending');
+        
+        // Ordina entrambi i gruppi per data (più recenti prima)
+        const sortByDate = (a, b) => {
           const timeA = a.requestedAt?.toMillis?.() || 0;
           const timeB = b.requestedAt?.toMillis?.() || 0;
           return timeB - timeA;
-        });
+        };
+        
+        pendingRequests.sort(sortByDate);
+        handledRequests.sort(sortByDate);
+        
+        // Combina: prima pending, poi gestite
+        const requests = [...pendingRequests, ...handledRequests];
         
         console.log('Loaded requests for teacher:', requests);
         
@@ -713,16 +875,22 @@
         empty.classList.add('hidden');
         container.innerHTML = requests.map(req => {
           const reward = rewardMap[req.rewardId] || { name: 'Premio', cost: 0, icon: '🎁' };
+          const isPending = req.status === 'pending';
+          const statusIcon = req.status === 'approved' ? '✅' : req.status === 'rejected' ? '❌' : '';
+          const statusText = req.status === 'approved' ? 'Approvata' : req.status === 'rejected' ? 'Rifiutata' : '';
+          
           return `
-            <div class="transaction-item" style="flex-wrap: wrap;">
+            <div class="transaction-item" style="flex-wrap: wrap; ${isPending ? '' : 'opacity: 0.5;'}">
               <div class="transaction-icon">${reward.icon}</div>
               <div class="transaction-info">
                 <div class="transaction-reason">${req.studentName}</div>
-                <div class="transaction-meta">${reward.name} • ${currencySymbol}${reward.cost}</div>
+                <div class="transaction-meta">${reward.name} • ${currencySymbol}${reward.cost} ${!isPending ? `• ${statusIcon} ${statusText}` : ''}</div>
               </div>
               <div style="display: flex; gap: var(--space-2);">
-                <button class="btn btn-success btn-sm" onclick="approveRequest('${req.id}')">✅</button>
-                <button class="btn btn-danger btn-sm" onclick="rejectRequest('${req.id}')">❌</button>
+                ${isPending ? `
+                  <button class="btn btn-success btn-sm" onclick="approveRequest('${req.id}')">✅</button>
+                  <button class="btn btn-danger btn-sm" onclick="rejectRequest('${req.id}')">❌</button>
+                ` : ''}
               </div>
             </div>
           `;
@@ -749,8 +917,11 @@
       const confirmed = await Modal.confirm('Vuoi rifiutare questa richiesta?');
       if (!confirmed) return;
       
+      // Chiedi un motivo (opzionale)
+      const reason = prompt('Motivo del rifiuto (opzionale):\nQuesto messaggio sarà visibile allo studente.');
+      
       try {
-        await DB.rejectRewardRequest(requestId);
+        await DB.rejectRewardRequest(requestId, reason || '');
         Toast.success('Richiesta rifiutata');
         await loadPendingRequests();
         await loadStats();
@@ -767,6 +938,22 @@
         return;
       }
       
+      // Create a copy for sorting if needed
+      let displayStudents = [...myStudents];
+      if (sortMode === 'lastName') {
+        displayStudents.sort((a, b) => {
+          const aLastName = parseStudentName(a.name).lastName.toLowerCase();
+          const bLastName = parseStudentName(b.name).lastName.toLowerCase();
+          return aLastName.localeCompare(bLastName);
+        });
+      } else if (sortMode === 'firstName') {
+        displayStudents.sort((a, b) => {
+          const aFirstName = parseStudentName(a.name).firstName.toLowerCase();
+          const bFirstName = parseStudentName(b.name).firstName.toLowerCase();
+          return aFirstName.localeCompare(bFirstName);
+        });
+      }
+      
       container.innerHTML = `
         <div class="data-table-wrapper">
           <table class="data-table">
@@ -779,14 +966,14 @@
               </tr>
             </thead>
             <tbody>
-              ${myStudents.map(student => {
+              ${displayStudents.map(student => {
                 const cls = myClasses.find(c => c.id === student.classId);
                 return `
                   <tr>
                     <td>
                       <div style="display: flex; align-items: center; gap: var(--space-3);">
                         <div class="avatar avatar-sm">${UI.getInitials(student.name)}</div>
-                        ${student.name}
+                        ${formatStudentName(student.name)}
                       </div>
                     </td>
                     <td>${cls?.name || student.classId}</td>
@@ -809,6 +996,32 @@
           </table>
         </div>
       `;
+    }
+
+    function toggleNameFormat() {
+      nameFormat = nameFormat === 'firstBold' ? 'lastBold' : 'firstBold';
+      
+      // Re-render tables
+      renderStudentsTable();
+      renderStudentSelects();
+      
+      Toast.success(nameFormat === 'firstBold' ? 'Nome in grassetto' : 'Cognome in grassetto');
+    }
+
+    function sortStudentsByLastName() {
+      // Cycle through: none -> lastName -> firstName -> none
+      if (sortMode === 'none') {
+        sortMode = 'lastName';
+        Toast.success('Ordinati per cognome A-Z');
+      } else if (sortMode === 'lastName') {
+        sortMode = 'firstName';
+        Toast.success('Ordinati per nome A-Z');
+      } else {
+        sortMode = 'none';
+        Toast.success('Ordine originale ripristinato');
+      }
+      
+      renderStudentsTable();
     }
 
     async function quickGive(studentId, amount) {
@@ -892,6 +1105,8 @@
     }
 
     function showSection(sectionId) {
+      closeMobileSidebar(); // Close mobile sidebar when navigating
+      
       // Hide all sections
       document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
       
@@ -902,15 +1117,31 @@
       const sidebar = document.getElementById('mainSidebar');
       const header = document.getElementById('mainHeader');
       const mainContent = document.getElementById('mainContent');
+      const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
       
       if (sectionId === 'dashboard') {
-        sidebar.style.display = 'none';
-        header.style.display = 'none';
-        mainContent.style.marginLeft = '0';
+        // On desktop, hide sidebar; on mobile, keep it accessible
+        if (window.innerWidth > 768) {
+          sidebar.style.display = 'none';
+          header.style.display = 'none';
+          mainContent.style.marginLeft = '0';
+        } else {
+          // On mobile, hide header but keep sidebar accessible via button
+          header.style.display = 'none';
+          sidebar.classList.remove('open');
+        }
+        if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
       } else {
         sidebar.style.display = 'flex';
         header.style.display = 'flex';
-        mainContent.style.marginLeft = '';
+        if (window.innerWidth > 768) {
+          mainContent.style.marginLeft = '';
+        }
+        if (mobileMenuBtn) mobileMenuBtn.style.display = 'flex';
+        // Close sidebar on mobile after selecting an item
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+        }
       }
       
       // Update nav
@@ -927,7 +1158,7 @@
         'all-classes': 'Tutte le Classi',
         'impostazioni': 'Impostazioni'
       };
-      document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+      document.getElementById('pageTitle').textContent = titles[sectionId] || 'Home';
       
       // Load section-specific data
       if (sectionId === 'classes') renderClasses();
@@ -1055,6 +1286,7 @@
         container.innerHTML = grouped.map((group, index) => `
           <div class="transaction-item" style="background: white; border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3); box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
             <div style="position: absolute; top: var(--space-3); right: var(--space-3); display: flex; gap: var(--space-2);">
+              <button class="btn btn-ghost btn-sm" onclick="reuseTransactionGroup(${index})" style="padding: var(--space-1) var(--space-2);" title="Riusa questo premio">🔄</button>
               <button class="btn btn-ghost btn-sm" onclick="editTransactionGroup(${index})" style="padding: var(--space-1) var(--space-2);">✏️</button>
               <button class="btn btn-ghost btn-sm" onclick="deleteTransactionGroup(${index})" style="padding: var(--space-1) var(--space-2); color: var(--danger);">🗑️</button>
             </div>
@@ -1209,6 +1441,35 @@
         btn.disabled = false;
         btn.innerHTML = originalBtnText;
       }
+    }
+
+    function reuseTransactionGroup(groupIndex) {
+      const group = window.transactionGroups[groupIndex];
+      if (!group) return;
+      
+      // Switch to rewards section
+      showSection('rewards');
+      
+      // Fill custom reward fields with the transaction data
+      document.getElementById('customEmoji').value = group.icon || '⭐';
+      document.getElementById('customAmount').value = group.amount;
+      document.getElementById('customReason').value = group.reason;
+      
+      // Clear selected students and re-render
+      selectedStudents.clear();
+      renderStudentSelects();
+      updateRewardButton();
+      
+      // Scroll to the custom reward section smoothly
+      setTimeout(() => {
+        const rewardSection = document.getElementById('rewardsSection');
+        if (rewardSection) {
+          rewardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      
+      // Show a toast to inform the user
+      Toast.success('Premio riutilizzato! Seleziona gli studenti.');
     }
 
     // ===== All Classes Functions =====

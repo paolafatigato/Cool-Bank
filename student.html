@@ -15,11 +15,60 @@
   <style>
     .student-page {
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
       padding: var(--space-4);
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+    }
+    
+    /* Random gradient backgrounds */
+    .student-page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      transition: opacity 1.5s ease;
+    }
+    
+    .student-page.grad1::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 86% 61%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 60% 19%, hsla(346,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 10% 19%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 85% 15%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 45% 79%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 22% 64%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 50% 56%, hsla(328,87%,69%,1) 0px, transparent 50%);
+    }
+    
+    .student-page.grad2::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 27% 1%, hsla(346,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 99% 86%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 65% 23%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 36% 32%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 89% 58%, hsla(18,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 19% 37%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 14% 93%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 19% 77%, hsla(328,87%,69%,1) 0px, transparent 50%);
+    }
+    
+    .student-page.grad3::before {
+      background-color: hsla(328,87%,69%,1);
+      background-image:
+        radial-gradient(at 92% 44%, hsla(14,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 78% 75%, hsla(328,87%,69%,1) 0px, transparent 50%),
+        radial-gradient(at 27% 42%, hsla(41,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 72% 17%, hsla(270,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 24% 7%, hsla(166,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 94% 5%, hsla(29,100%,62%,1) 0px, transparent 50%),
+        radial-gradient(at 52% 71%, hsla(346,100%,62%,1) 0px, transparent 50%);
     }
 
     .student-header {
@@ -29,7 +78,22 @@
       animation: slideInDown 0.5s ease;
     }
 
-    .student-header .logo { font-size: 3rem; margin-bottom: var(--space-2); }
+    .student-header .logo { 
+      font-size: 3rem; 
+      margin-bottom: var(--space-2); 
+      animation: gentleFloat 3s ease-in-out infinite;
+      display: inline-block;
+    }
+    
+    @keyframes gentleFloat {
+      0%, 100% { 
+        transform: translateY(0px); 
+      }
+      50% { 
+        transform: translateY(-10px); 
+      }
+    }
+    
     .student-header h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--font-extrabold); text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .student-header .school-name { font-size: var(--text-sm); opacity: 0.9; margin-top: var(--space-1); }
 
@@ -304,6 +368,11 @@
     let teachers = [];
 
     async function init() {
+      // Apply random gradient on page load
+      const gradients = ['grad1', 'grad2', 'grad3'];
+      const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+      document.querySelector('.student-page').classList.add(randomGradient);
+      
       const params = new URLSearchParams(location.search);
       const studentId = params.get('id');
       const nfcTag = params.get('nfc');
@@ -394,7 +463,7 @@
       document.getElementById('mainContent').classList.remove('hidden');
       showMotivation();
       
-      // Real-time listener
+      // Real-time listener for balance updates
       db.collection('schools').doc(currentStudent.schoolId)
         .collection('students').doc(currentStudent.id)
         .onSnapshot(doc => {
@@ -404,6 +473,37 @@
             balanceEl.textContent = `${bal < 0 ? '-' : ''}${symbol}${Math.abs(bal)}`;
             balanceEl.classList.toggle('negative', bal < 0);
           }
+        });
+      
+      // Real-time listener for reward request status changes
+      db.collection('schools').doc(currentStudent.schoolId)
+        .collection('rewardRequests')
+        .where('studentId', '==', currentStudent.id)
+        .onSnapshot(snapshot => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === 'modified') {
+              const request = change.doc.data();
+              
+              // Notifica se la richiesta è stata rifiutata
+              if (request.status === 'rejected') {
+                const rewardName = request.rewardName || 'Ricompensa';
+                let message = `❌ La tua richiesta "${rewardName}" è stata rifiutata`;
+                
+                if (request.rejectionReason) {
+                  message += `\n\n💬 Motivo: ${request.rejectionReason}`;
+                }
+                
+                alert(message);
+              }
+              
+              // Notifica se la richiesta è stata approvata
+              if (request.status === 'approved') {
+                const rewardName = request.rewardName || 'Ricompensa';
+                alert(`✅ La tua richiesta "${rewardName}" è stata approvata!`);
+                loadRewards(); // Ricarica le ricompense
+              }
+            }
+          });
         });
     }
 
@@ -576,18 +676,38 @@
     
     async function sendRewardRequest(teacherId, teacherName) {
       try {
+        const message = document.getElementById('requestMessage').value.trim();
+        
+        // Trova il nome della ricompensa
+        const rewardDoc = await db.collection('schools')
+          .doc(currentStudent.schoolId)
+          .collection('rewards')
+          .doc(currentRewardRequest)
+          .get();
+        
+        const rewardName = rewardDoc.exists ? rewardDoc.data().name : 'Ricompensa';
+        
+        const requestData = {
+          studentId: currentStudent.id,
+          studentName: currentStudent.name,
+          rewardId: currentRewardRequest,
+          rewardName: rewardName,
+          teacherId: teacherId,
+          teacherName: teacherName,
+          status: 'pending',
+          requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Aggiungi il messaggio solo se non è vuoto
+        if (message) {
+          requestData.message = message;
+        }
+        
         await db.collection('schools')
           .doc(currentStudent.schoolId)
           .collection('rewardRequests')
-          .add({
-            studentId: currentStudent.id,
-            studentName: currentStudent.name,
-            rewardId: currentRewardRequest,
-            teacherId: teacherId,
-            teacherName: teacherName,
-            status: 'pending',
-            requestedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          .add(requestData);
+        
         closeTeacherModal();
         alert('✅ Richiesta inviata a ' + teacherName + '!');
       } catch (error) {
