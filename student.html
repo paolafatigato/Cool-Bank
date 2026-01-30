@@ -296,13 +296,31 @@
 
   <!-- Teacher Selection Modal -->
   <div id="teacherModal" class="teacher-selection-modal" style="display: none;" onclick="closeTeacherModal()">
-    <div class="card" style="max-width: 400px; margin: auto; margin-top: 100px;" onclick="event.stopPropagation()">
+    <div class="card" style="max-width: 500px; margin: auto; margin-top: 100px;" onclick="event.stopPropagation()">
       <div class="card-header">
         <h3 style="margin: 0;">👨‍🏫 Scegli il Professore</h3>
       </div>
       <div class="card-body">
         <p style="margin-bottom: var(--space-4); color: var(--text-muted);">A quale professore vuoi inviare la richiesta?</p>
-        <div id="teachersList" style="max-height: 300px; overflow-y: auto;"></div>
+        <div id="teachersList" style="max-height: 200px; overflow-y: auto; margin-bottom: var(--space-4);"></div>
+        
+        <div style="margin-top: var(--space-4);">
+          <label for="requestMessage" style="display: block; font-weight: var(--font-semibold); margin-bottom: var(--space-2); color: var(--text);">💬 Messaggio (opzionale)</label>
+          <textarea 
+            id="requestMessage" 
+            placeholder="Es: Vorrei ascoltare 'Imagine' di John Lennon..."
+            style="width: 100%; min-height: 80px; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); font-family: inherit; resize: vertical;"
+          ></textarea>
+        </div>
+        
+        <div style="margin-top: var(--space-4); display: flex; gap: var(--space-3); justify-content: flex-end;">
+          <button onclick="closeTeacherModal()" style="padding: var(--space-3) var(--space-5); border: 1px solid var(--border); background: white; color: var(--text); border-radius: var(--radius-md); cursor: pointer; font-weight: var(--font-semibold);">
+            ❌ Annulla
+          </button>
+          <button id="sendRequestBtn" onclick="sendSelectedRequest()" style="padding: var(--space-3) var(--space-5); border: none; background: var(--primary); color: white; border-radius: var(--radius-md); cursor: pointer; font-weight: var(--font-semibold);" disabled>
+            📤 Invia Richiesta
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -336,11 +354,12 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      transition: all 0.3s ease;
     }
     .teacher-item:hover {
-      background: #5D3FD3;
-      color: white;
+      background: #f0f0f0;
       transform: translateX(5px);
+      cursor: pointer;
     }
   </style>
 
@@ -590,7 +609,7 @@
               <div class="reward-info">
                 <div class="reward-name">${reward.name}</div>
                 <div class="reward-description">${reward.description || ''}</div>
-                <button class="request-btn" data-reward-id="${reward.id}">Richiedi</button>
+                <button class="request-btn" data-reward-id="${reward.id}" data-reward-name="${reward.name}">Richiedi</button>
               </div>
               <div class="reward-cost">${symbol}${reward.cost}</div>
             </div>
@@ -604,7 +623,7 @@
         buttons.forEach(btn => {
           btn.addEventListener('click', () => {
             console.log('Button clicked, reward ID:', btn.dataset.rewardId);
-            requestReward(btn.dataset.rewardId);
+            requestReward(btn.dataset.rewardId, btn.dataset.rewardName);
           });
         });
       } catch (error) {
@@ -625,7 +644,41 @@
       }
     }
 
-    async function requestReward(rewardId) {
+    function getPlaceholderForReward(rewardName) {
+      // Placeholder specifici per ricompense standard
+      const placeholders = {
+        // Ricompense da admin.html (italiano)
+        'Cambia compagno di banco': 'Es: Vorrei sedere con Sara per una settimana, Posso sedere vicino alla finestra?...',
+        'Scegli il tuo gruppo': 'Es: Voglio lavorare con Marco e Luca, Preferisco un gruppo di 4 persone...',
+        'Scegli una canzone': 'Es: Vorrei ascoltare "Imagine" di John Lennon, Possiamo mettere musica classica?...',
+        'Ringrazia un amico, leggi una poesia, canta una canzone': 'Es: Voglio leggere una poesia per il compleanno di Sara, Vorrei ringraziare pubblicamente Marco...',
+        'Scegli ordine interrogazione': 'Es: Preferisco andare per prima, Vorrei essere l\'ultima...',
+        'Rimuovi voto peggiore': 'Es: La verifica di matematica del 15/01, Il mio voto peggiore in storia...',
+        'Aggiungi mezzo punto': 'Es: L\'ultimo test di matematica, La verifica di scienze della settimana scorsa...',
+        '+1 al voto': 'Es: La verifica di matematica del 15/01, Il compito di storia della settimana scorsa...',
+        'Niente compiti una volta': 'Es: Ho allenamento di calcio fino a tardi, Ho un impegno importante domani...',
+        'Scegli l\'argomento': 'Es: Voglio studiare i dinosauri, Mi interessa l\'energia rinnovabile...',
+        'Scegli il prossimo compito': 'Es: Preferisco gli esercizi a pagina 42, Vorrei scrivere un tema invece di un riassunto...',
+        
+        // Ricompense da superadmin.html (italiano)
+        'Compagna di banco per una settimana': 'Es: Vorrei sedere con Giulia, Preferirei cambiare posto per una settimana...',
+        'Forma il gruppo': 'Es: Vorrei formare un gruppo con Marco, Sara e Luca, Preferisco gruppi da 3...',
+        'Messaggio pubblico': 'Es: Vorrei leggere una poesia per il compleanno di Sara, Voglio ringraziare pubblicamente Marco...',
+        'Scegli in che ordine essere interrogata': 'Es: Preferirei essere interrogata per prima, Vorrei andare per ultima...',
+        'Niente compiti': 'Es: Oggi ho allenamento fino a tardi, Domani ho un impegno importante...',
+        'Cancella un voto': 'Es: La verifica di matematica del 10/01, Il compito di italiano di settimana scorsa...'
+      };
+      
+      // Se la ricompensa ha un placeholder specifico, usalo
+      if (placeholders[rewardName]) {
+        return placeholders[rewardName];
+      }
+      
+      // Altrimenti usa un messaggio generico
+      return 'Spiega le specifiche della tua richiesta (quando, come, dove, con chi, ecc.)';
+    }
+
+    async function requestReward(rewardId, rewardName) {
       console.log('requestReward called with ID:', rewardId);
       console.log('Teachers:', teachers);
       
@@ -636,6 +689,10 @@
       
       currentRewardRequest = rewardId;
       console.log('Current reward request set to:', currentRewardRequest);
+      
+      // Imposta il placeholder appropriato
+      const messageField = document.getElementById('requestMessage');
+      messageField.placeholder = getPlaceholderForReward(rewardName);
       
       // Mostra modale con lista professori
       const modal = document.getElementById('teacherModal');
@@ -655,11 +712,11 @@
         </div>
       `).join('');
       
-      // Aggiungi event listeners
+      // Aggiungi event listeners per selezionare il professore
       document.querySelectorAll('.teacher-item').forEach(item => {
         item.addEventListener('click', () => {
           console.log('Teacher selected:', item.dataset.teacherName);
-          sendRewardRequest(item.dataset.teacherId, item.dataset.teacherName);
+          selectTeacher(item.dataset.teacherId, item.dataset.teacherName);
         });
       });
       
@@ -668,10 +725,52 @@
       console.log('Modal display style:', modal.style.display);
     }
     
+    let selectedTeacher = null;
+    
+    function selectTeacher(teacherId, teacherName) {
+      // Deseleziona tutti i professori
+      document.querySelectorAll('.teacher-item').forEach(item => {
+        item.style.background = '';
+        item.style.border = '';
+      });
+      
+      // Seleziona il professore cliccato
+      const selectedItem = document.querySelector(`.teacher-item[data-teacher-id="${teacherId}"]`);
+      if (selectedItem) {
+        selectedItem.style.background = 'var(--primary-light)';
+        selectedItem.style.border = '2px solid var(--primary)';
+      }
+      
+      // Salva la selezione
+      selectedTeacher = { id: teacherId, name: teacherName };
+      
+      // Abilita il pulsante di invio
+      document.getElementById('sendRequestBtn').disabled = false;
+    }
+    
+    async function sendSelectedRequest() {
+      if (!selectedTeacher) {
+        alert('⚠️ Seleziona un professore prima di inviare!');
+        return;
+      }
+      
+      await sendRewardRequest(selectedTeacher.id, selectedTeacher.name);
+      selectedTeacher = null;
+    }
+    
     function closeTeacherModal() {
       const modal = document.getElementById('teacherModal');
       modal.style.display = 'none';
       currentRewardRequest = null;
+      selectedTeacher = null;
+      // Reset messaggio e pulsante
+      document.getElementById('requestMessage').value = '';
+      document.getElementById('sendRequestBtn').disabled = true;
+      // Reset selezione visiva
+      document.querySelectorAll('.teacher-item').forEach(item => {
+        item.style.background = '';
+        item.style.border = '';
+      });
     }
     
     async function sendRewardRequest(teacherId, teacherName) {
